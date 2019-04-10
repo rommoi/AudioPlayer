@@ -9,6 +9,137 @@ namespace AudioPlayer
 {
     class Player
     {
+
+        const int maxVolume = 300;
+
+        private int _volume;
+
+        public int Volume
+        {
+            get { return _volume; }
+            set
+            {
+                if(value < 0)
+                {
+                    _volume = 0;
+                }else if(value > maxVolume)
+                {
+                    _volume = maxVolume;
+                }
+                else
+                {
+                    _volume = value;
+                }
+                Console.WriteLine("\nVolume changed : {0}", _volume);
+            }
+        }
+
+
+        public void VolumeUp()
+        {
+            Volume += 1;
+            Console.WriteLine("\nVolume increased");
+        }
+        public void VolumeDown()
+        {
+            Volume -= 1;
+            Console.WriteLine("\nVolume decreased");
+        }
+        public void VolumeChange(int value)
+        {
+            Volume = value;
+            //Console.WriteLine("\nVolume changed : {0}", Volume);
+        }
+
+
+
+        
+
+        private bool _locked = false;
+
+        //public bool Locked
+        //{
+        //    get { return _locked; }
+        //    set { _locked = value; }
+        //}
+
+        public void Lock()
+        {
+            _locked = true;
+            Console.WriteLine("\nPlayer locked...");
+        }
+        public void UnLock()
+        {
+            _locked = false;
+            Console.WriteLine("\nPlayer unlocked...");
+        }
+
+
+        private bool _playing = false;
+
+        public bool Playing { get { return _playing; } }
+
+        public bool Start()
+        {
+            if (!_locked)
+            {
+                if (currentSong != null)
+                {
+
+
+                    _playing = true;
+                    Console.WriteLine("\nPlayer started.");
+
+                    Console.WriteLine($"{currentSong.Title}, \t{currentSong.Artist.Name}, \t{currentSong.Album.Name}.");
+                    /*foreach (var item in songList)
+                    {
+                        Console.WriteLine($"{item.Artist.Name}, \t{item.Album.Name}, \t{item.Title}");
+                        Thread.Sleep(1000);
+                    }*/
+                }
+            }
+            return _playing;
+
+        }
+        public bool Stop()
+        {
+            if (!_locked)
+            {
+                _playing = false;
+                Console.WriteLine("\nPlayer stopped.");
+            }
+            return _playing;
+        }
+
+        private List<Song> songList = new List<Song>();
+
+        public void AddSong(Song song)
+        {
+            if (song != null)
+            {
+                songList.Add(song);
+            }
+        }
+
+        private Song currentSong;
+
+        public void SetSong()
+        {
+            Console.WriteLine("\nSongs:");
+            int i = 1;
+            foreach (var item in songList)
+            {
+                Console.WriteLine("\n" + i + " : " + item.Title);
+                i++;
+            }
+            UInt32 selected = 0;
+            Console.WriteLine("\nSelect song number:");
+            UInt32.TryParse(Console.ReadLine(), out selected);
+            if(selected != 0 && (selected-1) < songList.Count)
+            {
+                currentSong = songList[(int)(--selected)];
+            }
+        }
         //public Song[] Songs;
 
         ////public int Volume;
@@ -18,13 +149,7 @@ namespace AudioPlayer
         //private bool IsPlaying = false;
         //private const int _maxVolume = 100;
 
-        //private int myVar;
 
-        //public int MyProperty
-        //{
-        //    get { return myVar; }
-        //    set { myVar = value; }
-        //}
 
 
         //private int _volume;

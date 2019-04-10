@@ -8,6 +8,6 @@ namespace AudioPlayer
 {
     class Playlist
     {
-        //Song[] songs;
+        Song[] songs;
     }
 }

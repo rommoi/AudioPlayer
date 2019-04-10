@@ -8,8 +8,17 @@ namespace AudioPlayer
 {
     class Album
     {
-        //string Name;
-        //int Year;
-        //string Path;
+        public Album(string name, int year, string path)
+        {
+            Name = name;
+            Year = year;
+            Path = path;
+        }
+        public string Name { get; private set; }
+
+        public int Year { get; private set; }
+
+        public string Path { get; private set; }
+
     }
 }

@@ -8,33 +8,30 @@ namespace AudioPlayer
 {
     class Song
     {
-        //public int Duration;
-        //public string Title;
-        //public string Path;
-        //public string Lirics;
-        //public string Genre;
+        public Song(int duration, string title, string path, string lirics, string genre, Artist artist, Album album)
+        {
+            Duration = duration;
+            Title = title;
+            Path = path;
+            Lirics = lirics;
+            Genre = genre;
+            Artist = artist;
+            Album = album;
+        }
 
-        //public Artist Artist;
-        //Album Album;
+        public int Duration { get; private set; }
 
-        //private int _duration;
+        public string Title { get; private set; }
 
-        //public int Duration
-        //{
-        //    get { return _duration; }
-        //    private set { _duration = value; }
-        //}
+        public string Path { get; private set; }
 
+        public string Lirics { get; private set; }
 
-        //private string _title;
+        public string Genre { get; private set; }
 
-        //public string Title
-        //{
-        //    get { return _title; }
-        //    private set { _title = value; }
-        //}
+        public Artist Artist { get; private set; }
 
-
+        public Album Album { get; private set; }
 
     }
 }
