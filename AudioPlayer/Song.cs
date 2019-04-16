@@ -18,20 +18,26 @@ namespace AudioPlayer
             Artist = artist;
             Album = album;
         }
+        public Song(Artist artist, Album album, int duration = 0, string title = "", string path = "", string genre = "unknown")
+        {
 
-        public int Duration { get; private set; }
+        }
 
-        public string Title { get; private set; }
+        public double Duration { get; set; }
 
-        public string Path { get; private set; }
+        public string DurationMinSec { get; set; }
 
-        public string Lirics { get; private set; }
+        public string Title { get; set; }
 
-        public string Genre { get; private set; }
+        public string Path { get; set; }
 
-        public Artist Artist { get; private set; }
+        public string Lirics { get; set; }
 
-        public Album Album { get; private set; }
+        public string Genre { get; set; }
+
+        public Artist Artist { get; set; }
+
+        public Album Album { get; set; }
 
     }
 }

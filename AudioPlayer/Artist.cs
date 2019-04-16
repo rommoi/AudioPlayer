@@ -8,6 +8,12 @@ namespace AudioPlayer
 {
     class Artist
     {
+        public Artist()
+        {
+            Name = "unknown";
+            Nickname = "unknown";
+            Coutry = "unknown";
+        }
         public Artist(string name, string nickname, string country)
         {
             Name = name;
@@ -17,5 +23,12 @@ namespace AudioPlayer
         public string Name { get; private set; }
         public string Nickname { get; private set; }
         public string Coutry { get; private set; }
+
+        //public Artist GetArtistCopy {
+        //    get
+        //    {
+        //        return (Artist)this.MemberwiseClone();
+        //    }
+        //}
     }
 }

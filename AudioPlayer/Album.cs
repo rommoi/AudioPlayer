@@ -8,7 +8,13 @@ namespace AudioPlayer
 {
     class Album
     {
-        public Album(string name, int year, string path)
+        public Album()
+        {
+            Name = "unknown";
+            Year = DateTime.MinValue;
+            Path = "";
+        }
+        public Album(string name, DateTime year, string path)
         {
             Name = name;
             Year = year;
@@ -16,7 +22,7 @@ namespace AudioPlayer
         }
         public string Name { get; private set; }
 
-        public int Year { get; private set; }
+        public DateTime Year { get; private set; }
 
         public string Path { get; private set; }
 
