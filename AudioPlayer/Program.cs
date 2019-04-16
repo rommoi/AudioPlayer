@@ -17,49 +17,32 @@ namespace AudioPlayer
 
             
 
-            //int min, max, total = 0;
-            //Song[] sl = CreateSongs(out min, out max, ref total);
-
-            //Console.WriteLine($"{min}, \t {max}, \t {total}");
-
+            
             Player player = new Player();
 
             List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+            //foreach (var item in files)
+            //{
+            //    //try to use ID3 for extract info about songs
+            //    string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            //    player.AddSong(new Song(0, parts[parts.Length - 1], item, String.Empty, String.Empty,            //using add methos
+            //    new Artist(),
+            //    new Album(
+            //        "---",
+            //        default(DateTime),
+            //        "---"
+            //        )
+            //    ));
+            //}
+            List<Song> songsList = new List<Song>();
             foreach (var item in files)
             {
-                //try to use ID3 for extract info about songs
                 string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                player.AddSong(new Song(0, parts[parts.Length - 1], item, String.Empty, String.Empty,
-                new Artist(),
-                new Album(
-                    "---",
-                    default(DateTime),
-                    "---"
-                    )
-                ));
+                Song s = new Song(new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1]);
+                songsList.Add((Song)s);
             }
-
-            //Song[] s = CreateSongs();
-
-            //foreach (var item in s)
-            //{
-            //    player.AddSong(item);
-            //}
-
-            //Console.WriteLine("Artist, empty constructor:");
-            //Artist art1 = new Artist();                             //B5-Player5/10.Constructors
-            //Console.WriteLine("Artist constructor with parameters:");
-            //Artist art2 = new Artist("John", "Jack", "England");    //B5-Player5/10.Constructors
+            player.AddSong(songsList);  //using overloaded method
             
-            //player.AddSong(s1);
-            //player.AddSong(s2);
-            //player.AddSong(s3);
-
-            //var player = new Player();
-
-            //player.Songs = new[] { song1, song2 };
-
-            ////player.Play();
 
             while (true)
             {
@@ -103,6 +86,7 @@ namespace AudioPlayer
                         break;
                     case "quit":
                         player.Stop();
+                        player = null;
 
                         Environment.Exit(0);
                         break;

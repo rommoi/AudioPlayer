@@ -12,7 +12,7 @@ namespace AudioPlayer
         {
             Name = "unknown";
             Year = DateTime.MinValue;
-            Path = "";
+            Path = String.Empty;
         }
         public Album(string name, DateTime year, string path)
         {

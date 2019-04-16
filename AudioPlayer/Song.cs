@@ -18,9 +18,15 @@ namespace AudioPlayer
             Artist = artist;
             Album = album;
         }
-        public Song(Artist artist, Album album, int duration = 0, string title = "", string path = "", string genre = "unknown")
+        public Song(Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",string genre = "unknown")
         {
-
+            Duration = duration;
+            Title = title;
+            Path = path;
+            Lirics = lirics;
+            Genre = genre;
+            Artist = artist;
+            Album = album;
         }
 
         public double Duration { get; set; }

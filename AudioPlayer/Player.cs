@@ -11,9 +11,9 @@ namespace AudioPlayer
     class Player
     {
 
-        const int maxVolume = 300;
+        const int _maxVolume = 300;
 
-        WMPLib.WindowsMediaPlayer wmp = new WMPLib.WindowsMediaPlayer();
+        WMPLib.WindowsMediaPlayer _wmp = new WMPLib.WindowsMediaPlayer();
 
         private int _volume;
 
@@ -26,35 +26,35 @@ namespace AudioPlayer
                 {
                     
                     _volume = 0;
-                }else if(value > maxVolume)
+                }else if(value > _maxVolume)
                 {
-                    _volume = maxVolume;
+                    _volume = _maxVolume;
                     
                 }
                 else
                 {
                     _volume = value;
                 }
-                wmp.settings.volume = _volume;
+                _wmp.settings.volume = _volume;
                 Console.WriteLine("\nVolume changed : {0}", _volume);
             }
         }
 
         private bool _paused = false;
-        double time = 0.0;
+        double _time = 0.0;
         public void Pause()
         {
             if (_paused)
             {
                 _paused = false;
-                wmp.controls.currentPosition = time;
-                wmp.controls.play();
+                _wmp.controls.currentPosition = _time;
+                _wmp.controls.play();
             }
             else
             {
                 _paused = true;
-                time = wmp.controls.currentPosition;
-                wmp.controls.pause();
+                _time = _wmp.controls.currentPosition;
+                _wmp.controls.pause();
             }
             
         }
@@ -83,11 +83,11 @@ namespace AudioPlayer
 
         private bool _locked = false;
 
-        //public bool Locked
-        //{
-        //    get { return _locked; }
-        //    set { _locked = value; }
-        //}
+        public bool IsLocked
+        {
+            get { return _locked; }
+            
+        }
 
         public void Lock()
         {
@@ -109,39 +109,28 @@ namespace AudioPlayer
         {
             if (!_locked)
             {
-                if (currentSong != null)
+                if (_currentSong != null)
                 {
 
 
                     _playing = true;
                     Console.WriteLine("\nPlayer started.");
 
-                    wmp.URL = currentSong.Path;
-                    wmp.PlayStateChange += playerChenged;
-
-                   
-
+                    _wmp.URL = _currentSong.Path;
+                    _wmp.PlayStateChange += playerChenged;
+                    
                     try
                     {
 
-                        wmp.controls.play();
-
+                        _wmp.controls.play();
                         
-
-
                     }
                     catch(Exception ex)
                     {
                         Console.WriteLine(ex.Message);
-                        songList.Remove(currentSong);
+                        _songList.Remove(_currentSong);
                     }
-                    
-                    
-                    /*foreach (var item in songList)
-                    {
-                        Console.WriteLine($"{item.Artist.Name}, \t{item.Album.Name}, \t{item.Title}");
-                        Thread.Sleep(1000);
-                    }*/
+                  
                 }
                 else
                 {
@@ -159,11 +148,11 @@ namespace AudioPlayer
         private void playerChenged(int NewState)  //event handler to set song parameters
         {
             
-            currentSong.DurationMinSec = wmp.currentMedia.durationString;
-            currentSong.Duration = wmp.currentMedia.duration;
-            Console.WriteLine($"{currentSong.Title}, \t{currentSong.Artist.Name}, \t{currentSong.Album.Name}.");
+            _currentSong.DurationMinSec = _wmp.currentMedia.durationString;
+            _currentSong.Duration = _wmp.currentMedia.duration;
+            Console.WriteLine($"{_currentSong.Title}, \t{_currentSong.Artist.Name}, \t{_currentSong.Album.Name}.");
 
-            Console.WriteLine($"Name : {wmp.currentMedia.name}. Duration : {wmp.currentMedia.durationString}");
+            Console.WriteLine($"Name : {_wmp.currentMedia.name}. Duration : {_wmp.currentMedia.durationString}");
 
         }
 
@@ -172,35 +161,43 @@ namespace AudioPlayer
             if (!_locked)
             {
                 _playing = false;
-                wmp.controls.stop();
+                _wmp.PlayStateChange -= playerChenged;
+                _wmp.controls.stop();
                 Console.WriteLine("\nPlayer stopped.");
             }
 
-            wmp.PlayStateChange -= playerChenged;
+            _wmp.PlayStateChange -= playerChenged;
 
             return _playing;
 
             
         }
 
-        private List<Song> songList = new List<Song>();
+        private List<Song> _songList = new List<Song>();
 
-        public void AddSong(Song song)  
+        public void AddSong(Song song)  //methos get 1 song and add 1 song
         {
             if (song != null)
             {
-                songList.Add(song);
+                _songList.Add(song);
             }
         }
 
-        //public void AddSong(List<Song> songList)
-        //{
-        //    foreach (var item in songList)
-        //    {
-        //        this.songList.Add(item);
-        //    }
-        //}
-        //public void AddSong(Song[] songList)
+        public void AddSong(List<Song> songList) //overloading, get List<> and add it containment
+        {
+            foreach (var item in songList)
+            {
+                this._songList.Add(item);
+            }
+        }
+        public void AddSong(Song[] songList)  //overloading, get array and add songs
+        {
+            foreach (var item in songList)
+            {
+                this._songList.Add(item);
+            }
+        }
+        //public void AddSong(params Song[] songList) // the same as previous
         //{
         //    foreach (var item in songList)
         //    {
@@ -208,13 +205,13 @@ namespace AudioPlayer
         //    }
         //}
 
-        private Song currentSong;
+        private Song _currentSong;
 
         public void SetSong()
         {
             Console.WriteLine("\nSongs:");
             int i = 1;
-            foreach (var item in songList)
+            foreach (var item in _songList)
             {
                 Console.WriteLine("\n" + i + " : " + item.Title + " " + "\t" + item.Artist.Name);
                 
@@ -223,129 +220,14 @@ namespace AudioPlayer
             UInt32 selected = 0;
             Console.WriteLine("\nSelect song number:");
             UInt32.TryParse(Console.ReadLine(), out selected);
-            if(selected != 0 && (selected-1) < songList.Count)
+            if(selected != 0 && (selected-1) < _songList.Count)
             {
                 selected--;
-                currentSong = songList[(int)(selected)];
+                _currentSong = _songList[(int)(selected)];
                 
             }
         }
 
-        //private void playerChenged(object sender, WMPLib._WMPOCXEvents_PlayStateChangeEventHandler e)
-        //{
-        //    Console.WriteLine("-----------------------------------------------");
-        //    Console.WriteLine("Duration: {0}", wmp.currentMedia.duration);
-        //    Console.WriteLine("Duration: {0}", wmp.currentMedia.durationString);
-        //    Console.WriteLine("-----------------------------------------------");
-        //}
-        //public Song[] Songs;
-
-        ////public int Volume;
-
-        //private bool Locked;
-        //private int volume = 0;
-        //private bool IsPlaying = false;
-        //private const int _maxVolume = 100;
-
-
-
-
-        //private int _volume;
-        //public int Volume
-        //{
-        //    get
-        //    {
-        //        return _volume;
-        //    }
-        //    set
-        //    {
-        //        if(value > _maxVolume)
-        //        {
-        //            _volume = _maxVolume;
-        //        }else if(value < 0)
-        //        {
-        //            _volume = 0;
-        //        }
-        //        else
-        //        {
-        //            _volume = value;
-        //        }
-        //    }
-
-        //}
-
-        //public void VolumeUp()
-        //{
-        //    if ((Volume + 5) > 100)
-        //    {
-        //        Volume = 100;
-        //    }
-        //    else
-        //    {
-        //        Volume += 5;
-        //    }
-        //    Console.WriteLine("Volume " + Volume);
-        //}
-        //public void VolumeDown()
-        //{
-        //    if((Volume-5) < 0)
-        //    {
-        //        Volume = 0;
-        //    }
-        //    else
-        //    {
-        //        Volume -= 5;
-        //    }
-        //    Console.WriteLine("Volume " + Volume);
-        //}
-
-        //public void VolumeChange(int step)
-        //{
-
-        //}
-
-        //public bool Stop()
-        //{
-        //    IsPlaying = false;
-        //    Console.WriteLine("Player stopped");
-        //    return IsPlaying;
-        //}
-
-        //public bool Start()
-        //{
-        //    IsPlaying = true;
-        //    Console.WriteLine("Player started");
-        //    return IsPlaying;
-        //}
-
-        //public void Play()
-        //{
-        //    for (int i = 0; i < Songs.Length; i++)
-        //    {
-        //        Console.WriteLine("\n {0}", Songs[i].Title);
-        //        Thread.Sleep(2500);
-        //    }
-        //}
-
-        //public void LoadPlaylist()
-        //{
-
-        //}
-
-        //public void SavePlaylist()
-        //{
-
-        //}
-
-        //public void Lock()
-        //{
-        //    Locked = true;
-        //    Console.WriteLine("\nPlayer is locked");
-        //}
-        //public void UnLock()
-        //{
-        //    Locked = false;
-        //    Console.WriteLine("\nPlayer unlocked");
-        //}
+        
     }
 }
