@@ -39,7 +39,7 @@ namespace AudioPlayer
             {
                 string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 Song s = new Song(new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1]);
-                songsList.Add((Song)s);
+                songsList.Add(s);
             }
             player.AddSong(songsList);  //using overloaded method
             
@@ -83,6 +83,15 @@ namespace AudioPlayer
                         break;
                     case "pause":
                         player.Pause();
+                        break;
+                    case "show":
+                        player.SongListShow();
+                        break;
+                    case "sort":
+                        player.SongListSort();
+                        break;
+                    case "shuffle":
+                        player.SongListShuffle();
                         break;
                     case "quit":
                         player.Stop();
