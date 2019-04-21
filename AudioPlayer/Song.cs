@@ -8,7 +8,16 @@ namespace AudioPlayer
 {
     class Song
     {
-        public Song(int duration, string title, string path, string lirics, string genre, Artist artist, Album album)
+        public enum GenreType
+        {
+            unknown,
+            Rock,
+            Pop,
+            Jazz,
+            Classic,
+            Drum_n_Bass
+        }
+        public Song(int duration, string title, string path, string lirics, GenreType genre, Artist artist, Album album)
         {
             Duration = duration;
             Title = title;
@@ -18,7 +27,7 @@ namespace AudioPlayer
             Artist = artist;
             Album = album;
         }
-        public Song(bool? like, Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",string genre = "unknown")
+        public Song(bool? like, Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",GenreType genre = GenreType.unknown)
         {
             Duration = duration;
             Title = title;
@@ -40,7 +49,7 @@ namespace AudioPlayer
 
         public string Lirics { get; set; }
 
-        public string Genre { get; set; }
+        public GenreType Genre { get; set; }
 
         public Artist Artist { get; set; }
 
