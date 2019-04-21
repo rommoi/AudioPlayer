@@ -34,11 +34,15 @@ namespace AudioPlayer
             //        )
             //    ));
             //}
+            Random rnd = new Random();
+            var arr = new bool?[3] { false, true, null};
+
             List<Song> songsList = new List<Song>();
             foreach (var item in files)
             {
                 string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                Song s = new Song(new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1]);
+                
+                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1]);
                 songsList.Add(s);
             }
             player.AddSong(songsList);  //using overloaded method
@@ -95,9 +99,12 @@ namespace AudioPlayer
                         break;
                     case "quit":
                         player.Stop();
-                        player = null;
+                        //player = null;
 
                         Environment.Exit(0);
+                        break;
+                    case "setlike":
+                        player.SetLike();
                         break;
                     default:
                         Console.WriteLine("Unknown command...");

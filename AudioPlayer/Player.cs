@@ -111,7 +111,10 @@ namespace AudioPlayer
             {
                 if (_currentSong != null)
                 {
-
+                    if (Playing)
+                    {
+                        Stop();
+                    }
 
                     _playing = true;
                     Console.WriteLine("\nPlayer started.");
@@ -156,7 +159,7 @@ namespace AudioPlayer
 
         }
 
-        public bool Stop()
+        public void Stop()
         {
             if (!_locked)
             {
@@ -166,9 +169,9 @@ namespace AudioPlayer
                 Console.WriteLine("\nPlayer stopped.");
             }
 
-            _wmp.PlayStateChange -= playerChenged;
+            //_wmp.PlayStateChange -= playerChenged;
 
-            return _playing;
+            //return _playing;
 
             
         }
@@ -271,22 +274,48 @@ namespace AudioPlayer
         public void SongListShow()
         {
             int i = 1;
+            Console.WriteLine(new string('|', 50));
             foreach (var item in _songList)
             {
-                Console.WriteLine("\n" + i + " : " + item.Title + " " + "\t" + item.Artist.Name);
-
+                if(item.Like == true)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }else if(item.Like == false)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                
+                Console.WriteLine(i + " : " + item.Title + " " + "\t" + item.Artist.Name);
+                Console.ForegroundColor = ConsoleColor.White;
                 i++;
             }
+            Console.WriteLine(new string('|', 50));
         }
-        //public Player()
-        //{
-        //    _wmp = new WMPLib.WindowsMediaPlayer();
-        //    _wmp.PlayStateChange += playerChenged;
-        //}
-        //~Player()
-        //{
-        //    _wmp.PlayStateChange -= playerChenged;
-        //}
+        public void SetLike()
+        {
+            Console.WriteLine("Input songs number..");
+            int num;
+            int.TryParse(Console.ReadLine().Trim(), out num);
+            
+
+            if(--num > 0 && num < _songList.Count)
+            {
+                Console.WriteLine("Input like, dislike or neutral..");
+                var state = Console.ReadLine().Trim();
+
+                if (String.Compare(state, "like") == 0)
+                {
+                    _songList[num].Like = true;
+                }else if(String.Compare(state, "dislike") == 0)
+                {
+                    _songList[num].Like = false;
+                }
+                else if(String.Compare(state, "neutral") == 0)
+                {
+                    _songList[num].Like = null;
+                }
+            }
+        }
         
     }
 }

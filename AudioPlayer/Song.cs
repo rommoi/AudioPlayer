@@ -18,7 +18,7 @@ namespace AudioPlayer
             Artist = artist;
             Album = album;
         }
-        public Song(Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",string genre = "unknown")
+        public Song(bool? like, Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",string genre = "unknown")
         {
             Duration = duration;
             Title = title;
@@ -27,6 +27,7 @@ namespace AudioPlayer
             Genre = genre;
             Artist = artist;
             Album = album;
+            Like = like;
         }
 
         public double Duration { get; set; }
@@ -44,6 +45,8 @@ namespace AudioPlayer
         public Artist Artist { get; set; }
 
         public Album Album { get; set; }
+
+        public bool? Like { get; set; }
 
     }
 }
