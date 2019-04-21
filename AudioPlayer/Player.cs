@@ -271,6 +271,31 @@ namespace AudioPlayer
                 }
             }
         }
+        public void SongListGenreSort()
+        {
+            
+            bool _isSorted = false;
+            while (!_isSorted)
+            {
+                Song tempVar = null;
+                for (int i = 0; i < _songList.Count - 1; i++)
+                {
+
+                    if (_songList[i].Genre >= _songList[i + 1].Genre)
+                    {
+
+                        tempVar = _songList[i];
+                        _songList[i] = _songList[i + 1];
+                        _songList[i + 1] = tempVar;
+                    }
+                    _isSorted = true;
+                    for (int j = 0; j < _songList.Count - 1; j++)
+                    {
+                        if (_songList[j].Genre > _songList[j + 1].Genre) _isSorted = false;
+                    }
+                }
+            }
+        }
         public void SongListShow()
         {
             int i = 1;
@@ -285,7 +310,7 @@ namespace AudioPlayer
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
                 
-                Console.WriteLine(i + " : " + item.Title + " " + "\t" + item.Artist.Name);
+                Console.WriteLine(i + " : "+ item.Genre + " \t\t" + item.Title);
                 Console.ForegroundColor = ConsoleColor.White;
                 i++;
             }

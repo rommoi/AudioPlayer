@@ -10,7 +10,7 @@ namespace AudioPlayer
     {
         public enum GenreType
         {
-            unknown,
+            unknown = 0,
             Rock,
             Pop,
             Jazz,

@@ -42,7 +42,7 @@ namespace AudioPlayer
             {
                 string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 
-                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1]);
+                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(Song.GenreType)rnd.Next(6));
                 songsList.Add(s);
             }
             player.AddSong(songsList);  //using overloaded method
@@ -93,6 +93,9 @@ namespace AudioPlayer
                         break;
                     case "sort":
                         player.SongListSort();
+                        break;
+                    case "genresort":
+                        player.SongListGenreSort();
                         break;
                     case "shuffle":
                         player.SongListShuffle();
