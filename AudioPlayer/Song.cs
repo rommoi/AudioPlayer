@@ -6,17 +6,19 @@ using System.Threading.Tasks;
 
 namespace AudioPlayer
 {
-    class Song
+    public enum GenreType
     {
-        public enum GenreType
-        {
-            unknown = 0,
-            Rock,
-            Pop,
-            Jazz,
-            Classic,
-            Drum_n_Bass
-        }
+        UNKNOWN = 0,
+        ROCK,
+        POP,
+        JAZZ,
+        CLASSIC
+        
+    }
+
+    public class Song
+    {
+        
         public Song(int duration, string title, string path, string lirics, GenreType genre, Artist artist, Album album)
         {
             Duration = duration;
@@ -27,7 +29,7 @@ namespace AudioPlayer
             Artist = artist;
             Album = album;
         }
-        public Song(bool? like, Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",GenreType genre = GenreType.unknown)
+        public Song(bool? like, Artist artist, Album album, int duration = 0, string title = "", string path = "", string lirics = "unknown",GenreType genre = GenreType.UNKNOWN)
         {
             Duration = duration;
             Title = title;
@@ -37,6 +39,15 @@ namespace AudioPlayer
             Artist = artist;
             Album = album;
             Like = like;
+        }
+
+        public void Deconstruct(out string title, out GenreType genre, out bool? like, out double duration, out string durationMinSec)
+        {
+            title = Title;
+            genre = Genre;
+            like = Like;
+            duration = Duration;
+            durationMinSec = DurationMinSec;
         }
 
         public double Duration { get; set; }

@@ -42,7 +42,7 @@ namespace AudioPlayer
             {
                 string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 
-                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(Song.GenreType)rnd.Next(6));
+                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(GenreType)rnd.Next(5));
                 songsList.Add(s);
             }
             player.AddSong(songsList);  //using overloaded method
@@ -54,19 +54,14 @@ namespace AudioPlayer
                 string cmd = Console.ReadLine();
                 switch (cmd)
                 {
-                    case "up":
-                        player.VolumeUp();
-                        break;
-                    case "down":
-                        player.VolumeDown();
-                        break;
+                    
                     case "set volume":
                         Console.WriteLine("\ninput value :");
                         string val = Console.ReadLine();
                         int volumeValue = 0;
                         if (int.TryParse(val, out volumeValue))
                         {
-                            player.VolumeChange(volumeValue);
+                            player.Volume = (volumeValue);
                         }
                         break;
                     case "play":
@@ -95,7 +90,8 @@ namespace AudioPlayer
                         player.SongListSort();
                         break;
                     case "genresort":
-                        player.SongListGenreSort();
+                        Console.WriteLine("Input Genre you want..");
+                        player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
                         break;
                     case "shuffle":
                         player.SongListShuffle();

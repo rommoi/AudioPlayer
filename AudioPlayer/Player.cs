@@ -11,32 +11,24 @@ namespace AudioPlayer
     class Player
     {
 
-        const int _maxVolume = 300;
+        //const int _maxVolume = 300;
 
-        WMPLib.WindowsMediaPlayer _wmp = new WMPLib.WindowsMediaPlayer();
+        WMPLib.WindowsMediaPlayer _wmp;
 
-        private int _volume;
+        //private int _volume;
+        public Player()
+        {
+            _wmp = new WMPLib.WindowsMediaPlayer();
+            _wmp.PlayStateChange += new _WMPOCXEvents_PlayStateChangeEventHandler(_wmp_PlayStateChange);
+        }
 
         public int Volume
         {
-            get { return _volume; }
+            get { return _wmp.settings.volume; }
             set
             {
-                if(value < 0)
-                {
-                    
-                    _volume = 0;
-                }else if(value > _maxVolume)
-                {
-                    _volume = _maxVolume;
-                    
-                }
-                else
-                {
-                    _volume = value;
-                }
-                _wmp.settings.volume = _volume;
-                Console.WriteLine("\nVolume changed : {0}", _volume);
+                _wmp.settings.volume = value;
+                Console.WriteLine("\nVolume changed : {0}", _wmp.settings.volume);
             }
         }
 
@@ -61,21 +53,21 @@ namespace AudioPlayer
         
         
 
-        public void VolumeUp()
-        {
-            Volume += 1;
-            Console.WriteLine("\nVolume increased");
-        }
-        public void VolumeDown()
-        {
-            Volume -= 1;
-            Console.WriteLine("\nVolume decreased");
-        }
-        public void VolumeChange(int value)
-        {
-            Volume = value;
-            //Console.WriteLine("\nVolume changed : {0}", Volume);
-        }
+        //public void VolumeUp()
+        //{
+        //    Volume += 1;
+        //    Console.WriteLine("\nVolume increased");
+        //}
+        //public void VolumeDown()
+        //{
+        //    Volume -= 1;
+        //    Console.WriteLine("\nVolume decreased");
+        //}
+        //public void VolumeChange(int value)
+        //{
+        //    Volume = value;
+        //    //Console.WriteLine("\nVolume changed : {0}", Volume);
+        //}
 
 
 
@@ -120,8 +112,11 @@ namespace AudioPlayer
                     Console.WriteLine("\nPlayer started.");
 
                     _wmp.URL = _currentSong.Path;
-                    _wmp.PlayStateChange += playerChenged;
-                    
+
+                    //Console.WriteLine($"Name : {_wmp.currentMedia.name}. Duration : {_wmp.currentMedia.durationString}");
+                    GetSongData(_currentSong);
+
+
                     try
                     {
 
@@ -147,25 +142,42 @@ namespace AudioPlayer
             return _playing;
 
         }
-
-        private void playerChenged(int NewState)  //event handler to set song parameters
+        private void GetSongData(Song s)
         {
-            
-            _currentSong.DurationMinSec = _wmp.currentMedia.durationString;
-            _currentSong.Duration = _wmp.currentMedia.duration;
-            Console.WriteLine($"{_currentSong.Title}, \t{_currentSong.Artist.Name}, \t{_currentSong.Album.Name}.");
-
-            Console.WriteLine($"Name : {_wmp.currentMedia.name}. Duration : {_wmp.currentMedia.durationString}");
-
+             var (title, genre, _, duration, _) = s;
+            Console.WriteLine($"{title.CutString(30)} \t {genre} \t {duration}");
+            //return ();
         }
 
+        private void _wmp_PlayStateChange(int NewState)
+        {
+            //Console.WriteLine("-------------" + NewState + " \t" + (WMPPlayState)NewState);
+            //Console.WriteLine("-------------" + _wmp.playState);
+            switch ((WMPPlayState)NewState)
+            {
+                case WMPPlayState.wmppsPlaying:
+
+                    _currentSong.DurationMinSec = _wmp.currentMedia.durationString;
+                    _currentSong.Duration = _wmp.currentMedia.duration;
+                    //Console.WriteLine($"{_currentSong.Title}, \t{_currentSong.Artist.Name}, \t{_currentSong.Album.Name}.");
+
+                    //Console.WriteLine($"Name : {_wmp.currentMedia.name}. Duration : {_wmp.currentMedia.durationString}");
+                    break;
+                case WMPPlayState.wmppsStopped:
+                    //_wmp.PlayStateChange -= _wmp_PlayStateChange;
+                    break;
+            }
+        }
+
+        
         public void Stop()
         {
             if (!_locked)
             {
                 _playing = false;
-                _wmp.PlayStateChange -= playerChenged;
+                
                 _wmp.controls.stop();
+                _wmp.PlayStateChange -= _wmp_PlayStateChange;
                 Console.WriteLine("\nPlayer stopped.");
             }
 
@@ -235,71 +247,88 @@ namespace AudioPlayer
 
         public void SongListShuffle()
         {
-            Random rnd = new Random();
-            for (int i = 0; i < 100; i++)
-            {
-                int index1 = rnd.Next(_songList.Count);
-                int index2 = rnd.Next(_songList.Count);
+            _songList.ShuffleSongs();
+            //Random rnd = new Random();
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    int index1 = rnd.Next(_songList.Count);
+            //    int index2 = rnd.Next(_songList.Count);
 
-                Song tempVar = _songList[index1];
-                _songList[index1] = _songList[index2];
-                _songList[index2] = tempVar;
+            //    Song tempVar = _songList[index1];
+            //    _songList[index1] = _songList[index2];
+            //    _songList[index2] = tempVar;
 
-            }
+            //}
         }
-        public void SongListSort() //sort only by first title char
+        public void SongListSort()
         {
-            bool _isSorted = false;
-            while (!_isSorted)
-            {
-                Song tempVar = null;
-                for (int i = 0; i < _songList.Count - 1; i++)
-                {
+            _songList.SongSorter();
+        }
+        //public void SongListSort() //sort only by first title char
+        //{
+        //    bool _isSorted = false;
+        //    while (!_isSorted)
+        //    {
+        //        Song tempVar = null;
+        //        for (int i = 0; i < _songList.Count - 1; i++)
+        //        {
                     
-                    if ( char.ToLower( _songList[i].Title[0]) >= char.ToLower(_songList[i+1].Title[0]))
-                    {
+        //            if ( char.ToLower( _songList[i].Title[0]) >= char.ToLower(_songList[i+1].Title[0]))
+        //            {
                        
-                        tempVar = _songList[i];
-                        _songList[i] = _songList[i + 1];
-                        _songList[i + 1] = tempVar;
-                    }
-                    _isSorted = true;
-                    for (int j = 0; j < _songList.Count - 1; j++)
-                    {
-                        if ( char.ToLower(_songList[j].Title[0]) > char.ToLower(_songList[j + 1].Title[0])) _isSorted = false;
-                    }
-                }
-            }
-        }
-        public void SongListGenreSort()
+        //                tempVar = _songList[i];
+        //                _songList[i] = _songList[i + 1];
+        //                _songList[i + 1] = tempVar;
+        //            }
+        //            _isSorted = true;
+        //            for (int j = 0; j < _songList.Count - 1; j++)
+        //            {
+        //                if ( char.ToLower(_songList[j].Title[0]) > char.ToLower(_songList[j + 1].Title[0])) _isSorted = false;
+        //            }
+        //        }
+        //    }
+        //}
+        public void SongListGenreSort(string genre)
         {
+            string g = genre;
             
-            bool _isSorted = false;
-            while (!_isSorted)
+            GenreType gt = (GenreType)Enum.Parse(typeof(GenreType), genre);
+            List<Song> filteredSongList = new List<Song>();
+            foreach (var item in _songList)
             {
-                Song tempVar = null;
-                for (int i = 0; i < _songList.Count - 1; i++)
+                if(item.Genre == gt)
                 {
-
-                    if (_songList[i].Genre >= _songList[i + 1].Genre)
-                    {
-
-                        tempVar = _songList[i];
-                        _songList[i] = _songList[i + 1];
-                        _songList[i + 1] = tempVar;
-                    }
-                    _isSorted = true;
-                    for (int j = 0; j < _songList.Count - 1; j++)
-                    {
-                        if (_songList[j].Genre > _songList[j + 1].Genre) _isSorted = false;
-                    }
+                    filteredSongList.Add(item);
                 }
             }
+            _songList = filteredSongList;
+
+            //bool _isSorted = false;
+            //while (!_isSorted)
+            //{
+            //    Song tempVar = null;
+            //    for (int i = 0; i < _songList.Count - 1; i++)
+            //    {
+
+            //        if (_songList[i].Genre >= _songList[i + 1].Genre)
+            //        {
+
+            //            tempVar = _songList[i];
+            //            _songList[i] = _songList[i + 1];
+            //            _songList[i + 1] = tempVar;
+            //        }
+            //        _isSorted = true;
+            //        for (int j = 0; j < _songList.Count - 1; j++)
+            //        {
+            //            if (_songList[j].Genre > _songList[j + 1].Genre) _isSorted = false;
+            //        }
+            //    }
+            //}
         }
         public void SongListShow()
         {
             int i = 1;
-            Console.WriteLine(new string('|', 50));
+            Console.WriteLine(new string('|', 100));
             foreach (var item in _songList)
             {
                 if(item.Like == true)
@@ -310,7 +339,7 @@ namespace AudioPlayer
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
                 
-                Console.WriteLine(i + " : "+ item.Genre + " \t\t" + item.Title);
+                Console.WriteLine(i + " : "+ item.Genre + " \t\t" + item.Title.CutString(20));
                 Console.ForegroundColor = ConsoleColor.White;
                 i++;
             }
