@@ -8,12 +8,27 @@ namespace AudioPlayer
 {
     class Band
     {
-        //string Title;
+        public Band(DateTime year, string title = "unknown", string genre = "unknown", bool isexist = false)
+        {
+            Title = title;
+            Genre = genre;
+            IsExist = isexist;
+            Year = year;
+        }
+        public Band(string title, string genre, DateTime year, bool isexist)
+        {
+            Title = title;
+            Genre = genre;
+            IsExist = isexist;
+            Year = year;
+        }
 
-        //string Genre;
+        public string Title { get; private set; }
 
-        //int Year;
+        public string Genre { get; private set; }
 
-        //bool isExist;
+        public DateTime Year { get; private set; }
+
+        public bool IsExist { get; private set; }
     }
 }
