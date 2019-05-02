@@ -1,6 +1,7 @@
 ﻿using AudioPlayer.OutputSkins;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,6 +26,20 @@ namespace AudioPlayer
             _skin = skin;
 
             //_skin.Clear();
+            List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+
+            Random rnd = new Random();
+            var arr = new bool?[3] { false, true, null };
+
+            List<Song> songsList = new List<Song>();
+            foreach (var item in files)
+            {
+                string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title: parts[parts.Length - 1], path: parts[parts.Length - 1], genre: (GenreType)rnd.Next(5));
+                songsList.Add(s);
+            }
+            AddSong(songsList);  //using overloaded method
         }
 
         
@@ -44,7 +59,7 @@ namespace AudioPlayer
                 int volumeValue = 0;
                 if (int.TryParse(val, out volumeValue))
                 {
-                    _wmp.settings.volume = value;
+                    _wmp.settings.volume = volumeValue;
                     //Console.WriteLine("\nVolume changed : {0}", _wmp.settings.volume);
                     _skin.Render($"\nVolume changed : {_wmp.settings.volume}");
                 }
@@ -196,24 +211,24 @@ namespace AudioPlayer
             }
         }
 
-        
+
         public void Stop()
         {
-            if (!_locked)
-            {
-                _playing = false;
-                
-                _wmp.controls.stop();
-                _wmp.PlayStateChange -= _wmp_PlayStateChange;
-                _skin.Render("\nPlayer stopped.");
-                //Console.WriteLine("\nPlayer stopped.");
-            }
 
-            //_wmp.PlayStateChange -= playerChenged;
+            _playing = false;
 
-            //return _playing;
-
+            _wmp.controls.stop();
+            //_wmp.PlayStateChange -= _wmp_PlayStateChange;
             
+            _skin.Render("\nPlayer stopped.");
+
+        }
+        public void Quit()
+        {
+            Stop();
+            _wmp.PlayStateChange -= _wmp_PlayStateChange;
+            _wmp = null;
+            _skin.Render("Qiut...");
         }
 
         private List<Song> _songList = new List<Song>();
@@ -323,6 +338,10 @@ namespace AudioPlayer
         public void SongListShow()
         {
             int i = 1;
+            _skin.Clear();
+
+            Skin _tempSkin = _skin;
+            _skin = SkinFactory.CreateSkin("classic", "");
             _skin.Render(new string('|', 100));
             //Console.WriteLine(new string('|', 100));
             foreach (var item in _songList)
@@ -342,10 +361,13 @@ namespace AudioPlayer
                 //Console.WriteLine("{0} : {1, 10}   {2,-25}", i, item.Genre, item.Title.CutString(20));
                 
                 _skin.Render(String.Format("{0} : {1, 10}  {2, -10}  {3,-25}", i, item.Genre, item.Like == true ? "Like!" : (item.Like == false ? "Dislike" : "neutral"), item.Title.CutString(20)));
+                
                 //Console.ForegroundColor = ConsoleColor.White;
                 i++;
             }
+            
             _skin.Render(new string('|', 50));
+            _skin = _tempSkin;
             //Console.WriteLine(new string('|', 50));
         }
         public void SetLike()
@@ -377,13 +399,13 @@ namespace AudioPlayer
         }
         public void SetSkin()
         {
-            
-            
-                _skin.Render("input skin name:");
 
-                _skin = SkinFactory.CreateSkin(Console.ReadLine().ToLower().Trim());
-                
-            
+
+            _skin.Render("input skin name:");
+
+            _skin = SkinFactory.CreateSkin(Console.ReadLine().ToLower().Trim(), "");
+            _skin.Render($"You set : {_skin.Name}");
+
         }
 
     }

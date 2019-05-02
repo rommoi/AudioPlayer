@@ -20,10 +20,10 @@ namespace AudioPlayer
 
 
             //Player player = new Player(new ColorOutputSkin("redd"));
-            //Player player = new Player(new RandomColorOutputSkin());
-            Player player = new Player(new MyEyes_____());
+            Player player = new Player(new RandomColorOutputSkin());
+            //Player player = new Player(new MyEyes_____());
 
-            List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+            //List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
             //foreach (var item in files)
             //{
             //    //try to use ID3 for extract info about songs
@@ -37,18 +37,18 @@ namespace AudioPlayer
             //        )
             //    ));
             //}
-            Random rnd = new Random();
-            var arr = new bool?[3] { false, true, null};
+            //Random rnd = new Random();
+            //var arr = new bool?[3] { false, true, null};
 
-            List<Song> songsList = new List<Song>();
-            foreach (var item in files)
-            {
-                string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            //List<Song> songsList = new List<Song>();
+            //foreach (var item in files)
+            //{
+            //    string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 
-                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(GenreType)rnd.Next(5));
-                songsList.Add(s);
-            }
-            player.AddSong(songsList);  //using overloaded method
+            //    Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(GenreType)rnd.Next(5));
+            //    songsList.Add(s);
+            //}
+            //player.AddSong(songsList);  //using overloaded method
             
 
             while (true)
@@ -87,7 +87,7 @@ namespace AudioPlayer
                     case "sort":
                         player.SongListSort();
                         break;
-                    case "genresort":
+                    case "genre sort":
                         //Console.WriteLine("Input Genre you want..");
                         player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
                         break;
@@ -95,12 +95,11 @@ namespace AudioPlayer
                         player.SongListShuffle();
                         break;
                     case "quit":
-                        player.Stop();
-                        //player = null;
+                        player.Quit();
 
                         Environment.Exit(0);
                         break;
-                    case "setlike":
+                    case "set like":
                         player.SetLike();
                         break;
                     case "set skin":

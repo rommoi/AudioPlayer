@@ -13,6 +13,7 @@ namespace AudioPlayer.OutputSkins
         public override void Clear()
         {
             Console.Clear();
+            
         }
 
         public override void Render(string txt)

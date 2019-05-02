@@ -29,13 +29,8 @@ namespace AudioPlayer.OutputSkins
 
         public override void Render(string txt)
         {
-            _color = (ConsoleColor)rnd.Next(15);
-
-            if (_color == ConsoleColor.Black)
-            {
-                Console.BackgroundColor = ConsoleColor.White;
-            }
-
+            _color = (ConsoleColor)rnd.Next(1, 15); //exclude black, because background is black.
+            
             Console.ForegroundColor = _color;
             Console.WriteLine(txt);
         }

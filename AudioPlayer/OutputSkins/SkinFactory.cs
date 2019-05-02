@@ -8,12 +8,14 @@ namespace AudioPlayer.OutputSkins
 {
     public static class SkinFactory
     {
-        public static Skin CreateSkin(string txt)
+        public static Skin CreateSkin(string txt, string color)
         {
             switch (txt)
             {
                 //case "classic": return new ClassicOutputSkin();
                 //    break;
+                case "colored": return new ColorOutputSkin(color);
+                    break;
                 case "random color": return new RandomColorOutputSkin();
                     break;
                 case "my eyes": return new MyEyes_____();
