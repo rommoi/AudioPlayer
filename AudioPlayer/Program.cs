@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Console;
+using AudioPlayer.OutputSkins;
 
 
 namespace AudioPlayer
@@ -15,10 +16,12 @@ namespace AudioPlayer
         {
 
 
-            
 
-            
-            Player player = new Player();
+
+
+            //Player player = new Player(new ColorOutputSkin("redd"));
+            //Player player = new Player(new RandomColorOutputSkin());
+            Player player = new Player(new MyEyes_____());
 
             List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
             //foreach (var item in files)
@@ -50,19 +53,14 @@ namespace AudioPlayer
 
             while (true)
             {
-                Console.WriteLine("Next action :");
+                player.LabelOutput("Next action:");
+                //Console.WriteLine("Next action :");
                 string cmd = Console.ReadLine();
                 switch (cmd)
                 {
                     
                     case "set volume":
-                        Console.WriteLine("\ninput value :");
-                        string val = Console.ReadLine();
-                        int volumeValue = 0;
-                        if (int.TryParse(val, out volumeValue))
-                        {
-                            player.Volume = (volumeValue);
-                        }
+                        player.Volume = player.Volume;
                         break;
                     case "play":
                         player.Start();
@@ -90,7 +88,7 @@ namespace AudioPlayer
                         player.SongListSort();
                         break;
                     case "genresort":
-                        Console.WriteLine("Input Genre you want..");
+                        //Console.WriteLine("Input Genre you want..");
                         player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
                         break;
                     case "shuffle":
@@ -105,8 +103,12 @@ namespace AudioPlayer
                     case "setlike":
                         player.SetLike();
                         break;
+                    case "set skin":
+                        player.SetSkin(); 
+                        break;
                     default:
-                        Console.WriteLine("Unknown command...");
+                        player.LabelOutput("Unknown command...");
+                        //Console.WriteLine("Unknown command...");
                         break;
                 }
 

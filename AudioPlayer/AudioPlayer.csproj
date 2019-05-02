@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,6 +47,12 @@
     <Compile Include="Album.cs" />
     <Compile Include="Artist.cs" />
     <Compile Include="Band.cs" />
+    <Compile Include="OutputSkins\ClassicOutputSkin.cs" />
+    <Compile Include="OutputSkins\ColorOutputSkin.cs" />
+    <Compile Include="OutputSkins\MyEyes!!!!!.cs" />
+    <Compile Include="OutputSkins\RandomColorOutputSkin.cs" />
+    <Compile Include="OutputSkins\Skin.cs" />
+    <Compile Include="OutputSkins\SkinFactory.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Playlist.cs" />
     <Compile Include="Program.cs" />

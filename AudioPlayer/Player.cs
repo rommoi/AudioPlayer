@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AudioPlayer.OutputSkins;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,12 +15,22 @@ namespace AudioPlayer
         //const int _maxVolume = 300;
 
         WMPLib.WindowsMediaPlayer _wmp;
+        Skin _skin;
 
         //private int _volume;
-        public Player()
+        public Player(Skin skin)
         {
             _wmp = new WMPLib.WindowsMediaPlayer();
             _wmp.PlayStateChange += new _WMPOCXEvents_PlayStateChangeEventHandler(_wmp_PlayStateChange);
+            _skin = skin;
+
+            //_skin.Clear();
+        }
+
+        
+        public void LabelOutput(string label)
+        {
+            _skin.Render(label);
         }
 
         public int Volume
@@ -27,8 +38,17 @@ namespace AudioPlayer
             get { return _wmp.settings.volume; }
             set
             {
-                _wmp.settings.volume = value;
-                Console.WriteLine("\nVolume changed : {0}", _wmp.settings.volume);
+                _skin.Render("\ninput value :");
+                //Console.WriteLine("\ninput value :");
+                string val = Console.ReadLine();
+                int volumeValue = 0;
+                if (int.TryParse(val, out volumeValue))
+                {
+                    _wmp.settings.volume = value;
+                    //Console.WriteLine("\nVolume changed : {0}", _wmp.settings.volume);
+                    _skin.Render($"\nVolume changed : {_wmp.settings.volume}");
+                }
+                
             }
         }
 
@@ -84,12 +104,14 @@ namespace AudioPlayer
         public void Lock()
         {
             _locked = true;
-            Console.WriteLine("\nPlayer locked...");
+            _skin.Render("\nPlayer locked...");
+            //Console.WriteLine("\nPlayer locked...");
         }
         public void UnLock()
         {
             _locked = false;
-            Console.WriteLine("\nPlayer unlocked...");
+            _skin.Render("\nPlayer unlocked...");
+            //Console.WriteLine("\nPlayer unlocked...");
         }
 
 
@@ -109,7 +131,8 @@ namespace AudioPlayer
                     }
 
                     _playing = true;
-                    Console.WriteLine("\nPlayer started.");
+                    _skin.Render("\nPlayer started.");
+                    //Console.WriteLine("\nPlayer started.");
 
                     _wmp.URL = _currentSong.Path;
 
@@ -125,19 +148,22 @@ namespace AudioPlayer
                     }
                     catch(Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        _skin.Render(ex.Message);
+                        //Console.WriteLine(ex.Message);
                         _songList.Remove(_currentSong);
                     }
                   
                 }
                 else
                 {
-                    Console.WriteLine("Please choose a song.");
+                    _skin.Render("Please choose a song.");
+                    //Console.WriteLine("Please choose a song.");
                 }
             }
             else
             {
-                Console.WriteLine("Player locked... Unlock it to play song.");
+                _skin.Render("Player locked... Unlock it to play song.");
+                //Console.WriteLine("Player locked... Unlock it to play song.");
             }
             return _playing;
 
@@ -145,7 +171,8 @@ namespace AudioPlayer
         private void GetSongData(Song s)
         {
              var (title, genre, _, duration, _) = s;
-            Console.WriteLine($"{title.CutString(30)} \t {genre} \t {duration}");
+            _skin.Render($"{title.CutString(30)} \t {genre} \t {duration}");
+            //Console.WriteLine($"{title.CutString(30)} \t {genre} \t {duration}");
             //return ();
         }
 
@@ -178,7 +205,8 @@ namespace AudioPlayer
                 
                 _wmp.controls.stop();
                 _wmp.PlayStateChange -= _wmp_PlayStateChange;
-                Console.WriteLine("\nPlayer stopped.");
+                _skin.Render("\nPlayer stopped.");
+                //Console.WriteLine("\nPlayer stopped.");
             }
 
             //_wmp.PlayStateChange -= playerChenged;
@@ -224,18 +252,14 @@ namespace AudioPlayer
 
         public void SetSong()
         {
-            Console.WriteLine("\nSongs:");
-            //int i = 1;
-            //foreach (var item in _songList)
-            //{
-            //    Console.WriteLine("\n" + i + " : " + item.Title + " " + "\t" + item.Artist.Name);
-
-            //    i++;
-            //}
+            _skin.Render("\nSongs:");
+            //Console.WriteLine("\nSongs:");
+            
             SongListShow();
 
             UInt32 selected = 0;
-            Console.WriteLine("\nSelect song number:");
+            _skin.Render("\nSelect song number:");
+            //Console.WriteLine("\nSelect song number:");
             UInt32.TryParse(Console.ReadLine(), out selected);
             if(selected != 0 && (selected-1) < _songList.Count)
             {
@@ -248,17 +272,7 @@ namespace AudioPlayer
         public void SongListShuffle()
         {
             _songList.ShuffleSongs();
-            //Random rnd = new Random();
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    int index1 = rnd.Next(_songList.Count);
-            //    int index2 = rnd.Next(_songList.Count);
-
-            //    Song tempVar = _songList[index1];
-            //    _songList[index1] = _songList[index2];
-            //    _songList[index2] = tempVar;
-
-            //}
+            
         }
         public void SongListSort()
         {
@@ -290,6 +304,7 @@ namespace AudioPlayer
         //}
         public void SongListGenreSort(string genre)
         {
+            _skin.Render("Input Genre you want..");
             string g = genre;
             
             GenreType gt = (GenreType)Enum.Parse(typeof(GenreType), genre);
@@ -303,58 +318,48 @@ namespace AudioPlayer
             }
             _songList = filteredSongList;
 
-            //bool _isSorted = false;
-            //while (!_isSorted)
-            //{
-            //    Song tempVar = null;
-            //    for (int i = 0; i < _songList.Count - 1; i++)
-            //    {
-
-            //        if (_songList[i].Genre >= _songList[i + 1].Genre)
-            //        {
-
-            //            tempVar = _songList[i];
-            //            _songList[i] = _songList[i + 1];
-            //            _songList[i + 1] = tempVar;
-            //        }
-            //        _isSorted = true;
-            //        for (int j = 0; j < _songList.Count - 1; j++)
-            //        {
-            //            if (_songList[j].Genre > _songList[j + 1].Genre) _isSorted = false;
-            //        }
-            //    }
-            //}
+            
         }
         public void SongListShow()
         {
             int i = 1;
-            Console.WriteLine(new string('|', 100));
+            _skin.Render(new string('|', 100));
+            //Console.WriteLine(new string('|', 100));
             foreach (var item in _songList)
             {
-                if(item.Like == true)
+                if (item.Like == true)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                }else if(item.Like == false)
+                }
+                else if (item.Like == false)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                //Console.WriteLine("{0} : {1, 10}   {2,-25}", i, item.Genre, item.Title.CutString(20));
                 
-                Console.WriteLine(i + " : "+ item.Genre + " \t\t" + item.Title.CutString(20));
-                Console.ForegroundColor = ConsoleColor.White;
+                _skin.Render(String.Format("{0} : {1, 10}  {2, -10}  {3,-25}", i, item.Genre, item.Like == true ? "Like!" : (item.Like == false ? "Dislike" : "neutral"), item.Title.CutString(20)));
+                //Console.ForegroundColor = ConsoleColor.White;
                 i++;
             }
-            Console.WriteLine(new string('|', 50));
+            _skin.Render(new string('|', 50));
+            //Console.WriteLine(new string('|', 50));
         }
         public void SetLike()
         {
-            Console.WriteLine("Input songs number..");
+            _skin.Render("Input songs number..");
+            //Console.WriteLine("Input songs number..");
             int num;
             int.TryParse(Console.ReadLine().Trim(), out num);
             
 
             if(--num > 0 && num < _songList.Count)
             {
-                Console.WriteLine("Input like, dislike or neutral..");
+                _skin.Render("Input like, dislike or neutral..");
+                //Console.WriteLine("Input like, dislike or neutral..");
                 var state = Console.ReadLine().Trim();
 
                 if (String.Compare(state, "like") == 0)
@@ -370,6 +375,16 @@ namespace AudioPlayer
                 }
             }
         }
-        
+        public void SetSkin()
+        {
+            
+            
+                _skin.Render("input skin name:");
+
+                _skin = SkinFactory.CreateSkin(Console.ReadLine().ToLower().Trim());
+                
+            
+        }
+
     }
 }
