@@ -8,19 +8,19 @@ using static System.Console;
 using AudioPlayer.OutputSkins;
 
 
+
+
 namespace AudioPlayer
 {
     class Program
     {
         static void Main(string[] args)
         {
-
-
-
+            
 
 
             //Player player = new Player(new ColorOutputSkin("redd"));
-            Player player = new Player(new RandomColorOutputSkin());
+            PlayerBase<AudioItem> player = new Player(SkinFactory.CreateSkin("", ""));
             //Player player = new Player(new MyEyes_____());
 
             //List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
@@ -63,42 +63,44 @@ namespace AudioPlayer
                         player.Volume = player.Volume;
                         break;
                     case "play":
-                        player.Start();
+                        player.Play();
                         //player.Playing = true; //error. Property or indexer 'Player.Plaing' cannot be assigned to -- it is read only
                         break;
                     case "stop":
                         player.Stop();
                         break;
                     case "lock":
-                        player.Lock();
+                        player.LockUnLock = true;
                         break;
                     case "unlock":
-                        player.UnLock();
+                        player.LockUnLock = false;
                         break;
                     case "set song":
-                        player.SetSong();
+                        player.SetPlayingItem();
                         break;
                     case "pause":
                         player.Pause();
                         break;
                     case "show":
-                        player.SongListShow();
+                        player.ShowPlaylist();
                         break;
                     case "sort":
-                        player.SongListSort();
+                        player.SortPlayList_ByTitle();
                         break;
-                    case "genre sort":
+                    case "genre filter":
                         //Console.WriteLine("Input Genre you want..");
-                        player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
+                        //player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
+                        (player as Player).Filter_ByGenre();
                         break;
                     case "shuffle":
-                        player.SongListShuffle();
+                        player.ShufflePlayList();
                         break;
                     case "quit":
-                        player.Quit();
+                        player.ClosePlayer();
 
                         Environment.Exit(0);
-                        break;
+                        return;
+                        
                     case "set like":
                         player.SetLike();
                         break;
@@ -107,7 +109,7 @@ namespace AudioPlayer
                         break;
                     default:
                         player.LabelOutput("Unknown command...");
-                        //Console.WriteLine("Unknown command...");
+                        
                         break;
                 }
 

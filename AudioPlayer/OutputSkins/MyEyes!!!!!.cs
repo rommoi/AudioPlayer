@@ -19,7 +19,7 @@ namespace AudioPlayer.OutputSkins
         public override void Render(string txt)
         {
             Random rnd = new Random();
-            
+            Console.BackgroundColor = ConsoleColor.Black;
             foreach (var item in txt)
             {
                 
