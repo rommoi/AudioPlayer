@@ -8,7 +8,7 @@ namespace AudioPlayer
 {
     class Playlist
     {
-        Song[] _songs;
+        //Song[] _songs;
 
 
     }

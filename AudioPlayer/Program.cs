@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Console;
+using AudioPlayer.OutputSkins;
+
+
 
 
 namespace AudioPlayer
@@ -13,14 +16,14 @@ namespace AudioPlayer
     {
         static void Main(string[] args)
         {
-
-
             
 
-            
-            Player player = new Player();
 
-            List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+            //Player player = new Player(new ColorOutputSkin("redd"));
+            PlayerBase<AudioItem> player = new Player(SkinFactory.CreateSkin("", ""));
+            //Player player = new Player(new MyEyes_____());
+
+            //List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
             //foreach (var item in files)
             //{
             //    //try to use ID3 for extract info about songs
@@ -34,79 +37,79 @@ namespace AudioPlayer
             //        )
             //    ));
             //}
-            Random rnd = new Random();
-            var arr = new bool?[3] { false, true, null};
+            //Random rnd = new Random();
+            //var arr = new bool?[3] { false, true, null};
 
-            List<Song> songsList = new List<Song>();
-            foreach (var item in files)
-            {
-                string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            //List<Song> songsList = new List<Song>();
+            //foreach (var item in files)
+            //{
+            //    string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 
-                Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(GenreType)rnd.Next(5));
-                songsList.Add(s);
-            }
-            player.AddSong(songsList);  //using overloaded method
+            //    Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title:parts[parts.Length - 1], path: parts[parts.Length - 1], genre:(GenreType)rnd.Next(5));
+            //    songsList.Add(s);
+            //}
+            //player.AddSong(songsList);  //using overloaded method
             
 
             while (true)
             {
-                Console.WriteLine("Next action :");
+                player.LabelOutput("Next action:");
+                //Console.WriteLine("Next action :");
                 string cmd = Console.ReadLine();
                 switch (cmd)
                 {
                     
                     case "set volume":
-                        Console.WriteLine("\ninput value :");
-                        string val = Console.ReadLine();
-                        int volumeValue = 0;
-                        if (int.TryParse(val, out volumeValue))
-                        {
-                            player.Volume = (volumeValue);
-                        }
+                        player.Volume = player.Volume;
                         break;
                     case "play":
-                        player.Start();
+                        player.Play();
                         //player.Playing = true; //error. Property or indexer 'Player.Plaing' cannot be assigned to -- it is read only
                         break;
                     case "stop":
                         player.Stop();
                         break;
                     case "lock":
-                        player.Lock();
+                        player.LockUnLock = true;
                         break;
                     case "unlock":
-                        player.UnLock();
+                        player.LockUnLock = false;
                         break;
                     case "set song":
-                        player.SetSong();
+                        player.SetPlayingItem();
                         break;
                     case "pause":
                         player.Pause();
                         break;
                     case "show":
-                        player.SongListShow();
+                        player.ShowPlaylist();
                         break;
                     case "sort":
-                        player.SongListSort();
+                        player.SortPlayList_ByTitle();
                         break;
-                    case "genresort":
-                        Console.WriteLine("Input Genre you want..");
-                        player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
+                    case "genre filter":
+                        //Console.WriteLine("Input Genre you want..");
+                        //player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
+                        (player as Player).Filter_ByGenre();
                         break;
                     case "shuffle":
-                        player.SongListShuffle();
+                        player.ShufflePlayList();
                         break;
                     case "quit":
-                        player.Stop();
-                        //player = null;
+                        player.ClosePlayer();
 
                         Environment.Exit(0);
-                        break;
-                    case "setlike":
+                        return;
+                        
+                    case "set like":
                         player.SetLike();
                         break;
+                    case "set skin":
+                        player.SetSkin(); 
+                        break;
                     default:
-                        Console.WriteLine("Unknown command...");
+                        player.LabelOutput("Unknown command...");
+                        
                         break;
                 }
 
