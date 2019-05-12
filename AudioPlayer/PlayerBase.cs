@@ -1,6 +1,7 @@
 ﻿using AudioPlayer.OutputSkins;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -109,15 +110,14 @@ namespace AudioPlayer
             _skin.Render($"You set : {_skin.Name}");
         }
 
-        public void AddItem(T item)
+        public abstract void Load(string folderPath);
+        public virtual void Clear()
         {
-            _plaingItems.Add(item);
+            _plaingItems.Clear();
         }
 
-        public void AddItem(IEnumerable<T> itemsList)
-        {
-            _plaingItems = itemsList.ToList();
-        }
+        public abstract void SavePlaylist(string name);
+        public abstract void LoadPlaylist(string path);
 
         public virtual void SetPlayingItem()
         {

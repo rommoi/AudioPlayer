@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WMPLib;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AudioPlayer
 {
@@ -15,46 +16,71 @@ namespace AudioPlayer
 
         
         WMPLib.WindowsMediaPlayer _wmp;
-        
+        enum SerializerType
+        {
+            BIN,
+            SOAP,
+            XML,
+            JSON
+        }
         
         public Player(Skin skin) : base(skin)
         {
             _wmp = new WMPLib.WindowsMediaPlayer();
             _wmp.PlayStateChange += new _WMPOCXEvents_PlayStateChangeEventHandler(_wmp_PlayStateChange);
+
+
+            Load(Environment.CurrentDirectory);
            
-            
-
-            
-            List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
-
-            Random rnd = new Random();
-            var arr = new bool?[3] { false, true, null };
-
-            List<AudioItem> songsList = new List<AudioItem>();
-            foreach (var item in files)
-            {
-                string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                AudioItem ai = new AudioItem(0, parts[parts.Length - 1], parts[parts.Length - 1], arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
-                //Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title: parts[parts.Length - 1], path: parts[parts.Length - 1], genre: (GenreType)rnd.Next(5));
-                songsList.Add(ai);
-            }
-            AddItem(songsList);  //using overloaded method
-
-            //_wmp.newPlaylist("playlist1", "");
-            //var l = Directory.GetFiles(@"d:\DefaultRepository\", "*.mp3", SearchOption.AllDirectories);
-            //foreach (var item in l)
-            //{
-            //    IWMPMedia w = _wmp.newMedia(item);
-            //    _wmp.currentPlaylist.appendItem(w);
-            //    Console.WriteLine($"{w.durationString} {w.name}");
-            //}
-            
-            //_wmp.controls.play();
 
         }
 
+        public override void Load(string folderPath)
+        {
+            try
+            {
+                var files = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+                Random rnd = new Random();
+                var arr = new bool?[3] { false, true, null };
+                
+                foreach (var item in files)
+                {
+                    string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                    AudioItem ai = new AudioItem(0, parts[parts.Length - 1], parts[parts.Length - 1], arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
+                    _plaingItems.Add(ai);
+                }
+                
+                //_wmp.newPlaylist("playlist1", "");
+                //foreach (var item in _plaingItems)
+                //{
+                //    IWMPMedia w = _wmp.newMedia(item.Path);
+                //    _wmp.currentPlaylist.appendItem(w);
+                //    Console.WriteLine($"{w.durationString} {w.name}");
+                //}
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Couldn't open folder:  {0}", folderPath);
+            }
+        }
+
+        public override void Clear()
+        {
+            base.Clear();
+            _wmp.currentPlaylist.clear();
+        }
+
         
+        public override void SavePlaylist(string name)
+        {
+            PlaylistSerializer.BinSerialize(_plaingItems, name);
+        }
+        public override void LoadPlaylist(string path)
+        {
+            _plaingItems = DeserializerFactory.DeserializeObjects(path).ToList();
         
+        }
+
 
         bool _isLocked;
         public override bool LockUnLock {
@@ -102,10 +128,11 @@ namespace AudioPlayer
 
                     _playing = true;
                     _skin.Render("\nPlayer started.");
+
+                    _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
+                    //_wmp.URL = _currentItem.Path;
                     
-                    _wmp.URL = _currentItem.Path;
-                    
-                    GetPlayingItemData(_currentItem);
+                    //GetPlayingItemData(_currentItem);
                     
                     try
                     {
@@ -181,17 +208,20 @@ namespace AudioPlayer
 
                 i++;
             }
-
-            _skin.Render(new string('|', 100));
+            
             _skin = _tempSkin;
+            _skin.Render(new string('|', 100));
+            
+            
            
         }
 
         protected override void GetPlayingItemData(AudioItem item)
         {
             var (duration, durationMS, title, path, like) = item;
-            _skin.Render($"{title.CutString(30)} \t {duration} \t {durationMS}");
-            
+            _skin.Render($"{_wmp.currentMedia.name.CutString(30)} \t {_wmp.currentMedia.duration} \t {_wmp.currentMedia.durationString}");
+            //_skin.Render($"{title.CutString(30)} \t {duration} \t {durationMS}");
+
         }
 
         private void _wmp_PlayStateChange(int NewState)
@@ -199,7 +229,7 @@ namespace AudioPlayer
             switch ((WMPPlayState)NewState)
             {
                 case WMPPlayState.wmppsPlaying:
-
+                    GetPlayingItemData(_currentItem);
                     //_currentSong.DurationMinSec = _wmp.currentMedia.durationString;
                     //_currentSong.Duration = _wmp.currentMedia.duration;
                     break;

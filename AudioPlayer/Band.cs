@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace AudioPlayer
 {
+    [Serializable]
     class Band
     {
+        
         public Band(DateTime year, string title = "unknown", string genre = "unknown", bool isexist = false)
         {
             Title = title;
