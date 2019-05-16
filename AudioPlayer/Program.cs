@@ -15,17 +15,26 @@ namespace AudioPlayer
     {
         static void Main(string[] args)
         {
-            
-
-
-            //Player player = new Player(new ColorOutputSkin("redd"));
-            PlayerBase<AudioItem> player = new Player(SkinFactory.CreateSkin("", ""));
-            //Player player = new Player(new MyEyes_____());
-
-
 
             try
             {
+                Run();
+                GC.Collect();
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadLine();
+                
+            }
+
+        }
+        static void Run()
+        {
+            using (PlayerBase<AudioItem> player = new Player(SkinFactory.CreateSkin("", "")))
+            {
+
                 while (true)
                 {
                     player.LabelOutput("Next action:");
@@ -71,10 +80,11 @@ namespace AudioPlayer
                             player.ShufflePlayList();
                             break;
                         case "quit":
-                            player.ClosePlayer();
+                            //player.ClosePlayer();
+                            //player.Dispose();
 
-                            Environment.Exit(0);
-                            //return;
+                            //Environment.Exit(0);
+                            return;
                             break;
 
                         case "set like":
@@ -109,48 +119,42 @@ namespace AudioPlayer
 
 
                 }
-            }catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine();
-                Console.ReadLine();
+
+
             }
-            Console.WriteLine();
+            //Console.ReadLine();
 
 
-                //Console.ReadLine();
+            //private static Song[] CreateSongs(out int min, out int max, ref int total)
+            //{
+            //    Song[] songArray = new Song[5];
+            //    Random rnd = new Random();
+            //    int minDuration = int.MaxValue, maxDuration = int.MinValue, totalDuration = 0;
+            //    for (int i = 0; i < songArray.Length; i++)
+            //    {
+            //        var song1 = new Song(0, "", "", "", "", new Artist(), new Album("", 0, ""));
+            //        song1.Title = "10";
+            //        song1.Duration = rnd.Next(5000);
+            //        song1.Artist = new Artist();
+
+            //        totalDuration += song1.Duration;
+
+            //        minDuration = song1.Duration < minDuration ? song1.Duration : minDuration;
+            //        maxDuration = song1.Duration > maxDuration ? song1.Duration : maxDuration;
+
+            //        songArray[i] = song1;
+
+            //        Console.WriteLine($"{song1.Duration}.");
+            //    }
+
+            //    min = minDuration;
+            //    max = maxDuration;
+            //    total = totalDuration;
+
+            //    return songArray;
         }
-        
-        //private static Song[] CreateSongs(out int min, out int max, ref int total)
-        //{
-        //    Song[] songArray = new Song[5];
-        //    Random rnd = new Random();
-        //    int minDuration = int.MaxValue, maxDuration = int.MinValue, totalDuration = 0;
-        //    for (int i = 0; i < songArray.Length; i++)
-        //    {
-        //        var song1 = new Song(0, "", "", "", "", new Artist(), new Album("", 0, ""));
-        //        song1.Title = "10";
-        //        song1.Duration = rnd.Next(5000);
-        //        song1.Artist = new Artist();
-
-        //        totalDuration += song1.Duration;
-
-        //        minDuration = song1.Duration < minDuration ? song1.Duration : minDuration;
-        //        maxDuration = song1.Duration > maxDuration ? song1.Duration : maxDuration;
-
-        //        songArray[i] = song1;
-
-        //        Console.WriteLine($"{song1.Duration}.");
-        //    }
-
-        //    min = minDuration;
-        //    max = maxDuration;
-        //    total = totalDuration;
-
-        //    return songArray;
-        //}
-
-
     }
-    
+
 }
+    
+

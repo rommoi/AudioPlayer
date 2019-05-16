@@ -45,18 +45,25 @@ namespace AudioPlayer
                 
                 foreach (var item in files)
                 {
-                    string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                    AudioItem ai = new AudioItem(0, parts[parts.Length - 1], parts[parts.Length - 1], arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
-                    _plaingItems.Add(ai);
+                    if (File.Exists(item))
+                    {
+                        AudioItem ai = new AudioItem(0, Path.GetFileNameWithoutExtension(item), Path.GetFileName(item), 
+                            arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
+                        _plaingItems.Add(ai);
+                        
+                    }
                 }
                 
-                //_wmp.newPlaylist("playlist1", "");
-                //foreach (var item in _plaingItems)
-                //{
-                //    IWMPMedia w = _wmp.newMedia(item.Path);
-                //    _wmp.currentPlaylist.appendItem(w);
-                //    Console.WriteLine($"{w.durationString} {w.name}");
-                //}
+                _wmp.newPlaylist("playlist1", "");
+                foreach (var item in _plaingItems)
+                {
+                    IWMPMedia w = _wmp.newMedia(item.Path);
+                    _wmp.currentPlaylist.appendItem(w);
+                    //_wmp.settings.setMode("loop", true);
+                    _wmp.settings.autoStart = true;
+                    
+                    //Console.WriteLine($"{w.durationString} {w.name}");
+                }
             }
             catch(Exception ex)
             {
@@ -121,10 +128,10 @@ namespace AudioPlayer
             {
                 if (_currentItem != null)
                 {
-                    if (_playing)
-                    {
-                        Stop();
-                    }
+                    //if (_playing)
+                    //{
+                    //    Stop();
+                    //}
 
                     _playing = true;
                     _skin.Render("\nPlayer started.");
@@ -234,8 +241,13 @@ namespace AudioPlayer
                     //_currentSong.Duration = _wmp.currentMedia.duration;
                     break;
                 case WMPPlayState.wmppsStopped:
+                    //_currentItem = _plaingItems[(_plaingItems.IndexOf(_currentItem)) % (_plaingItems.Count-1)];
+                    //Play();
+                    break;
+                case WMPPlayState.wmppsMediaEnded:
                     
                     break;
+                
 
             }
         }
@@ -246,6 +258,7 @@ namespace AudioPlayer
             Stop();
             _wmp.PlayStateChange -= _wmp_PlayStateChange;
             
+            _wmp.close();
             _wmp = null;
             _skin.Render("Qiut...");
             
@@ -264,8 +277,25 @@ namespace AudioPlayer
             }
         }
 
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
 
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+                ClosePlayer();
+                
+                Console.WriteLine("Player dispose");
 
+                disposedValue = true;
+            }
+        }
 
 
 
