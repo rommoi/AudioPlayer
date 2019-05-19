@@ -32,8 +32,58 @@ namespace AudioPlayer
         }
         static void Run()
         {
-            using (PlayerBase<AudioItem> player = new Player(SkinFactory.CreateSkin("", "")))
+            using (PlayerBase<AudioItem> player = new Player())
             {
+
+                player.LockStateChanged += (sender, e) =>
+                {
+                    PlayerView.UpdateScreen(player);
+                    Console.WriteLine($"Lock state changed event : {e.IsLocked}");
+                };
+                player.VolumeChanged += (sender, e) =>
+                {
+                    PlayerView.UpdateScreen(player);
+                    Console.WriteLine($"Volume changed event : {e.Volume}");
+                };
+                player.CollectionChanged += (sender, e) =>
+                {
+                    PlayerView.UpdateScreen(player);
+                    Console.WriteLine($"Colection changed event");
+                };
+                player.PlayerPlayingStateChanged += (sender, e) =>
+                {
+                    PlayerView.UpdateScreen(player);
+                    Console.WriteLine($"Started/Stopped event : {e.IsPlaying}");
+                };
+                player.PlaingItemStarted += (sender, e) =>
+                {
+                    PlayerView.UpdateScreen(player);
+                    Console.WriteLine($"Started song event : {e.ItemTitle} {e.ItemDuration} {e.ItemDurationMinSec}");
+                };
+
+                player.Load(Environment.CurrentDirectory);
+                Console.WriteLine("set song");
+                player.SetPlayingItem();
+
+                //Console.WriteLine("play");
+                //player.Play();
+                //Console.ReadLine();
+                //Console.WriteLine("set volume");
+                //player.Volume = 50;
+                //Console.ReadLine();
+                //Console.WriteLine("play");
+                //player.Play();
+                //Console.ReadLine();
+                //Console.WriteLine("lock");
+                //player.LockUnLock = true;
+                //Console.ReadLine();
+                //Console.WriteLine("play");
+                //player.Play();
+                //Console.ReadLine();
+                //Console.WriteLine("unlock");
+                //player.LockUnLock = false;
+                //Console.ReadLine();
+
 
                 while (true)
                 {
@@ -66,7 +116,7 @@ namespace AudioPlayer
                             player.Pause();
                             break;
                         case "show":
-                            player.ShowPlaylist();
+                            //player.ShowPlaylist();
                             break;
                         case "sort":
                             player.SortPlayList_ByTitle();
@@ -85,7 +135,7 @@ namespace AudioPlayer
 
                             //Environment.Exit(0);
                             return;
-                            break;
+                            //break;
 
                         case "set like":
                             player.SetLike();
@@ -122,36 +172,50 @@ namespace AudioPlayer
 
 
             }
-            //Console.ReadLine();
+            
+        }
+    }
 
 
-            //private static Song[] CreateSongs(out int min, out int max, ref int total)
-            //{
-            //    Song[] songArray = new Song[5];
-            //    Random rnd = new Random();
-            //    int minDuration = int.MaxValue, maxDuration = int.MinValue, totalDuration = 0;
-            //    for (int i = 0; i < songArray.Length; i++)
-            //    {
-            //        var song1 = new Song(0, "", "", "", "", new Artist(), new Album("", 0, ""));
-            //        song1.Title = "10";
-            //        song1.Duration = rnd.Next(5000);
-            //        song1.Artist = new Artist();
 
-            //        totalDuration += song1.Duration;
 
-            //        minDuration = song1.Duration < minDuration ? song1.Duration : minDuration;
-            //        maxDuration = song1.Duration > maxDuration ? song1.Duration : maxDuration;
 
-            //        songArray[i] = song1;
 
-            //        Console.WriteLine($"{song1.Duration}.");
-            //    }
+    class PlayerView
+    {
+        public static void UpdateScreen(PlayerBase<AudioItem> player)
+        {
+            Console.Clear();
 
-            //    min = minDuration;
-            //    max = maxDuration;
-            //    total = totalDuration;
+            int i = 0;
+            foreach (var item in player.GetPlaingItems())
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                if (player.GetSelectedItemIndex() == i)
+                {
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+                
+                 Console.WriteLine(String.Format("{0,2} : {1, 10}  {2, -10}  {3,-25}", ++i, item.Genre, item.Like == true ? "Like!" : (item.Like == false ? "Dislike" : "neutral"), item.Title.CutString(20)));
+                
+            }
+            Console.WriteLine();
 
-            //    return songArray;
+            //status string
+            Console.WriteLine($"Player Status: lock : {ConvertBoolToString.Convert( player.LockUnLock)}; volume : {player.Volume} ");
+            
+            Console.WriteLine($"Current Song: {player.GetCurrentPlaingItem<AudioItem>().Item1}  {player.GetCurrentPlaingItem<AudioItem>().Item2}  {player.GetCurrentPlaingItem<AudioItem>().Item3}");
+        }
+    }
+
+    static class ConvertBoolToString
+    {
+        public static string Convert(bool value)
+        {
+            if (value) return "Locked";
+            return "UnLocked";
         }
     }
 

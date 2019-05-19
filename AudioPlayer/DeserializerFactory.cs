@@ -37,11 +37,11 @@ namespace AudioPlayer
                     
                 case ".pplxml":
                     return null;
-                    break;
+                    //break;
                 default:
                     Console.WriteLine("Unsupported format...");
                     return null;
-                    break;
+                    //break;
             }
         }
     }

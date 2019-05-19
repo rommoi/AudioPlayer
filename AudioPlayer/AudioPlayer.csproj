@@ -49,6 +49,7 @@
     <Compile Include="Artist.cs" />
     <Compile Include="Band.cs" />
     <Compile Include="DeserializerFactory.cs" />
+    <Compile Include="EventArguments.cs" />
     <Compile Include="HelpersBase.cs" />
     <Compile Include="OutputSkins\ClassicOutputSkin.cs" />
     <Compile Include="OutputSkins\ColorOutputSkin.cs" />
