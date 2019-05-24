@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace AudioPlayer
 {
+    [Serializable]
     public class Artist
     {
         public Artist()

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AudioPlayer
 {
+    [Serializable]
     public class PlaingItem
     {
 
@@ -39,7 +41,7 @@ namespace AudioPlayer
         }
     }
 
-
+    [Serializable]
     public class AudioItem : PlaingItem
     {
 

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WMPLib;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AudioPlayer
 {
@@ -15,46 +16,73 @@ namespace AudioPlayer
 
         
         WMPLib.WindowsMediaPlayer _wmp;
+        enum SerializerType
+        {
+            BIN,
+            SOAP,
+            XML,
+            JSON
+        }
         
-        
-        public Player(Skin skin) : base(skin)
+        public Player() : base()
         {
             _wmp = new WMPLib.WindowsMediaPlayer();
             _wmp.PlayStateChange += new _WMPOCXEvents_PlayStateChangeEventHandler(_wmp_PlayStateChange);
+
+
+            //Load(Environment.CurrentDirectory);
            
-            
-
-            
-            List<string> files = Directory.GetFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
-
-            Random rnd = new Random();
-            var arr = new bool?[3] { false, true, null };
-
-            List<AudioItem> songsList = new List<AudioItem>();
-            foreach (var item in files)
-            {
-                string[] parts = item.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                AudioItem ai = new AudioItem(0, parts[parts.Length - 1], parts[parts.Length - 1], arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
-                //Song s = new Song(arr[rnd.Next(3)], new Artist(), new Album(), title: parts[parts.Length - 1], path: parts[parts.Length - 1], genre: (GenreType)rnd.Next(5));
-                songsList.Add(ai);
-            }
-            AddItem(songsList);  //using overloaded method
-
-            //_wmp.newPlaylist("playlist1", "");
-            //var l = Directory.GetFiles(@"d:\DefaultRepository\", "*.mp3", SearchOption.AllDirectories);
-            //foreach (var item in l)
-            //{
-            //    IWMPMedia w = _wmp.newMedia(item);
-            //    _wmp.currentPlaylist.appendItem(w);
-            //    Console.WriteLine($"{w.durationString} {w.name}");
-            //}
-            
-            //_wmp.controls.play();
 
         }
 
+        public override void Load(string folderPath)
+        {
+            try
+            {
+                var files = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+                Random rnd = new Random();
+                var arr = new bool?[3] { false, true, null };
+                
+                foreach (var item in files)
+                {
+                    if (File.Exists(item))
+                    {
+                        AudioItem ai = new AudioItem(0, Path.GetFileNameWithoutExtension(item), Path.GetFileName(item), 
+                            arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
+                        _plaingItems.Add(ai);
+                        
+                    }
+                }
+
+                CollectionChanged?.Invoke(this, EventArgs.Empty);
+                
+                _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
+                    
+            }
+            catch(Exception)
+            {
+                
+                Console.WriteLine("Couldn't open folder:  {0}", folderPath);
+            }
+        }
+
+        public override void Clear()
+        {
+            base.Clear();
+            _wmp.currentPlaylist.clear();
+        }
+
         
+        public override void SavePlaylist(string name)
+        {
+            PlaylistSerializer.BinSerialize(_plaingItems, name);
+        }
+        public override void LoadPlaylist(string path)
+        {
+            _plaingItems = DeserializerFactory.DeserializeObjects(path).ToList();
         
+        }
+
 
         bool _isLocked;
         public override bool LockUnLock {
@@ -65,8 +93,11 @@ namespace AudioPlayer
             set
             {
                 _isLocked = value;
-                if (_isLocked) _skin.Render("\nPlayer locked...");
-                else _skin.Render("\nPlayer unlocked...");
+
+                LockStateChanged?.Invoke(this, new LockEventArgs() { IsLocked = _isLocked });  //rise locked event
+
+                //if (_isLocked) _skin.Render("\nPlayer locked...");
+                //else _skin.Render("\nPlayer unlocked...");
             }
         }
 
@@ -77,13 +108,15 @@ namespace AudioPlayer
             }
             set
             {
-                _skin.Render("\ninput value :");
+                //_skin.Render("\ninput value :");
                 int volumeValue = 0;
                 if (int.TryParse(Console.ReadLine(), out volumeValue))
                 {
                     _wmp.settings.volume = volumeValue;
-                    
-                    _skin.Render($"\nVolume changed : {_wmp.settings.volume}");
+
+                    VolumeChanged?.Invoke(this, new VolumeEventArgs() { Volume = _wmp.settings.volume }); //rise volume event
+
+                    //_skin.Render($"\nVolume changed : {_wmp.settings.volume}");
                 }
             }
         }
@@ -95,17 +128,18 @@ namespace AudioPlayer
             {
                 if (_currentItem != null)
                 {
-                    if (_playing)
-                    {
-                        Stop();
-                    }
+                    //if (_playing)
+                    //{
+                    //    Stop();
+                    //}
 
                     _playing = true;
-                    _skin.Render("\nPlayer started.");
+                    //_skin.Render("\nPlayer started.");
+
+                    _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
+                    //_wmp.URL = _currentItem.Path;
                     
-                    _wmp.URL = _currentItem.Path;
-                    
-                    GetPlayingItemData(_currentItem);
+                    //GetPlayingItemData(_currentItem);
                     
                     try
                     {
@@ -113,19 +147,20 @@ namespace AudioPlayer
                     }
                     catch (Exception ex)
                     {
-                        _skin.Render(ex.Message);
+                        //_skin.Render(ex.Message);
                         _plaingItems.Remove(_currentItem);
+                        CollectionChanged?.Invoke(this, EventArgs.Empty);
                     }
 
                 }
                 else
                 {
-                    _skin.Render("Please choose a song.");
+                    //_skin.Render("Please choose a song.");
                 }
             }
             else
             {
-                _skin.Render("Player locked... Unlock it to play song.");
+                //_skin.Render("Player locked... Unlock it to play song.");
             }
             
         }
@@ -133,12 +168,14 @@ namespace AudioPlayer
         {
             _playing = false;
             _wmp.controls.stop();
-            _skin.Render("\nPlayer stopped.");
+            //_skin.Render("\nPlayer stopped.");
             
         }
 
         bool _paused = false;
         double _songTimeMark = 0.0;
+        
+
         public override void Pause()
         {
             if (_paused)
@@ -155,43 +192,55 @@ namespace AudioPlayer
             }
         }
 
-        public override void ShowPlaylist()
-        {
-            int i = 1;
-            _skin.Clear();
+        //public override void ShowPlaylist()
+        //{
+        //    int i = 1;
+        //    _skin.Clear();
 
-            Skin _tempSkin = _skin;
-            _skin = SkinFactory.CreateSkin("classic", "");
-            _skin.Render(new string('|', 100));
-            foreach (var item in _plaingItems)
-            {
-                if (item.Like == true)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                }
-                else if (item.Like == false)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                _skin.Render(String.Format("{0,2} : {1, 10}  {2, -10}  {3,-25}", i, item.Genre, item.Like == true ? "Like!" : (item.Like == false ? "Dislike" : "neutral"), item.Title.CutString(20)));
+        //    Skin _tempSkin = _skin;
+        //    _skin = SkinFactory.CreateSkin("classic", "");
+        //    _skin.Render(new string('|', 100));
+        //    foreach (var item in _plaingItems)
+        //    {
+        //        if (item.Like == true)
+        //        {
+        //            Console.ForegroundColor = ConsoleColor.Green;
+        //        }
+        //        else if (item.Like == false)
+        //        {
+        //            Console.ForegroundColor = ConsoleColor.Red;
+        //        }
+        //        else
+        //        {
+        //            Console.ForegroundColor = ConsoleColor.White;
+        //        }
+        //        _skin.Render(String.Format("{0,2} : {1, 10}  {2, -10}  {3,-25}", i, item.Genre, item.Like == true ? "Like!" : (item.Like == false ? "Dislike" : "neutral"), item.Title.CutString(20)));
 
-                i++;
-            }
-
-            _skin.Render(new string('|', 100));
-            _skin = _tempSkin;
+        //        i++;
+        //    }
+            
+        //    _skin = _tempSkin;
+        //    _skin.Render(new string('|', 100));
+            
+            
            
+        //}
+
+        public override List<AudioItem> GetPlaingItems()
+        {
+            return _plaingItems;
+        }
+        public override (string, double, string) GetCurrentPlaingItem<AudioItem>()
+        {
+            return (_wmp.currentMedia.name, _wmp.currentMedia.duration, _wmp.currentMedia.durationString);
         }
 
         protected override void GetPlayingItemData(AudioItem item)
         {
             var (duration, durationMS, title, path, like) = item;
-            _skin.Render($"{title.CutString(30)} \t {duration} \t {durationMS}");
-            
+            //_skin.Render($"{_wmp.currentMedia.name.CutString(30)} \t {_wmp.currentMedia.duration} \t {_wmp.currentMedia.durationString}");
+            //_skin.Render($"{title.CutString(30)} \t {duration} \t {durationMS}");
+
         }
 
         private void _wmp_PlayStateChange(int NewState)
@@ -199,13 +248,25 @@ namespace AudioPlayer
             switch ((WMPPlayState)NewState)
             {
                 case WMPPlayState.wmppsPlaying:
+                    //GetPlayingItemData(_currentItem);
 
-                    //_currentSong.DurationMinSec = _wmp.currentMedia.durationString;
-                    //_currentSong.Duration = _wmp.currentMedia.duration;
-                    break;
-                case WMPPlayState.wmppsStopped:
+                    PlayerPlayingStateChanged?.Invoke(this, new PlayingStateEventArgs() { IsPlaying = _playing });  //rise started stopped event 
+                    
+                    PlaingItemStarted?.Invoke(this, new PlaingItemEventArgs()
+                    {
+                        ItemTitle = _wmp.currentMedia.name.CutString(30),
+                        ItemDuration = _wmp.currentMedia.duration.ToString(),
+                        ItemDurationMinSec = _wmp.currentMedia.durationString
+                    });
                     
                     break;
+                case WMPPlayState.wmppsStopped:
+                    PlayerPlayingStateChanged?.Invoke(this, new PlayingStateEventArgs() { IsPlaying = _playing });  //rise started stopped event 
+                    break;
+                case WMPPlayState.wmppsMediaEnded:
+                    
+                    break;
+                
 
             }
         }
@@ -216,16 +277,21 @@ namespace AudioPlayer
             Stop();
             _wmp.PlayStateChange -= _wmp_PlayStateChange;
             
+            _wmp.close();
             _wmp = null;
-            _skin.Render("Qiut...");
+            //_skin.Render("Qiut...");
             
         }
-        
-        
+        public override void SetPlayingItem()
+        {
+            base.SetPlayingItem();
+            _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
+        }
+
 
         public void Filter_ByGenre()
         {
-            _skin.Render("Input Genre you want..");
+            //_skin.Render("Input Genre you want..");
             AudioItem.AudioGenre genre;
 
             if(Enum.TryParse(Console.ReadLine().Trim().ToUpper(), out genre))
@@ -234,12 +300,38 @@ namespace AudioPlayer
             }
         }
 
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    _wmp.PlayStateChange -= _wmp_PlayStateChange;
+                    
+                    _wmp?.close();
+                    _wmp = null;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+                
+                
+                Console.WriteLine("Player dispose");
+
+                disposedValue = true;
+            }
+            base.Dispose(false);
+        }
 
 
 
-
-
-
+        public override event EventHandler<PlayingStateEventArgs> PlayerPlayingStateChanged; //started stopped event     //
+        public override event EventHandler<PlaingItemEventArgs> PlaingItemStarted;           //song started              //
+        public override event EventHandler CollectionChanged;                                //list<song> changed        //
+        public override event EventHandler<VolumeEventArgs> VolumeChanged;                   //volume changed event      //
+        public override event EventHandler<LockEventArgs> LockStateChanged;                  //lock unlock state changed //
 
 
 

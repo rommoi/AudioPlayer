@@ -63,6 +63,7 @@ namespace AudioPlayer
 
             return collection.Where(x => x.Genre == genre).Select(x => x).ToList();
         }
+        
     } 
     
 }
