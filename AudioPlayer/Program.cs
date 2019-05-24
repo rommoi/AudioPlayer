@@ -150,27 +150,27 @@ namespace AudioPlayer
             player.LockStateChanged += (sender, e) =>
             {
                 this.UpdateScreen(player);
-                Console.WriteLine($"Lock state changed event : {e.IsLocked}");
+                //Console.WriteLine($"Lock state changed event : {e.IsLocked}");
             };
             player.VolumeChanged += (sender, e) =>
             {
                 this.UpdateScreen(player);
-                Console.WriteLine($"Volume changed event : {e.Volume}");
+                //Console.WriteLine($"Volume changed event : {e.Volume}");
             };
             player.CollectionChanged += (sender, e) =>
             {
                 this.UpdateScreen(player);
-                Console.WriteLine($"Colection changed event");
+                //Console.WriteLine($"Colection changed event");
             };
             player.PlayerPlayingStateChanged += (sender, e) =>
             {
                 this.UpdateScreen(player);
-                Console.WriteLine($"Started/Stopped event : {e.IsPlaying}");
+                //Console.WriteLine($"Started/Stopped event : {e.IsPlaying}");
             };
             player.PlaingItemStarted += (sender, e) =>
             {
                 this.UpdateScreen(player);
-                Console.WriteLine($"Started song event : {e.ItemTitle} {e.ItemDuration} {e.ItemDurationMinSec}");
+                //Console.WriteLine($"Started song event : {e.ItemTitle} {e.ItemDuration} {e.ItemDurationMinSec}");
             };
 
             //player.Load(Environment.CurrentDirectory);
@@ -200,6 +200,12 @@ namespace AudioPlayer
             Console.WriteLine($"Player Status: lock : {ConvertBoolToString.Convert( player.LockUnLock)}; volume : {player.Volume} ");
             
             Console.WriteLine($"Current Song: {player.GetCurrentPlaingItem<AudioItem>().Item1}  {player.GetCurrentPlaingItem<AudioItem>().Item2}  {player.GetCurrentPlaingItem<AudioItem>().Item3}");
+            Console.WriteLine(  );
+
+            Console.WriteLine("Active commands");
+            Console.WriteLine("Play (play)");
+            Console.WriteLine("Load (load)");
+            Console.WriteLine("Stop (stop)");
         }
         public async void Play()
         {
