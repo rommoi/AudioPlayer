@@ -11,7 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AudioPlayer
 {
-    class Player : PlayerBase<AudioItem>
+    public class Player : PlayerBase<AudioItem>
     {
 
         
@@ -29,41 +29,51 @@ namespace AudioPlayer
             _wmp = new WMPLib.WindowsMediaPlayer();
             _wmp.PlayStateChange += new _WMPOCXEvents_PlayStateChangeEventHandler(_wmp_PlayStateChange);
 
-
+            _wmp.settings.autoStart = false;
             //Load(Environment.CurrentDirectory);
            
 
         }
 
-        public override void Load(string folderPath)
+        public override Task Load(string folderPath)
         {
-            try
+            return Task.Factory.StartNew(() =>
             {
-                var files = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
-                Random rnd = new Random();
-                var arr = new bool?[3] { false, true, null };
-                
-                foreach (var item in files)
+                try
                 {
-                    if (File.Exists(item))
+                    lock (lockObject)
                     {
-                        AudioItem ai = new AudioItem(0, Path.GetFileNameWithoutExtension(item), Path.GetFileName(item), 
-                            arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
-                        _plaingItems.Add(ai);
+                        var files = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly).Where(s => new string[] { ".mp3", ".wav" }.Contains(Path.GetExtension(s))).ToList();
+                        Random rnd = new Random();
+                        var arr = new bool?[3] { false, true, null };
+
+                        foreach (var item in files)
+                        {
+                            if (File.Exists(item))
+                            {
+                                AudioItem ai = new AudioItem(0, Path.GetFileNameWithoutExtension(item), Path.GetFileName(item),
+                                    arr[rnd.Next(3)], new Artist(), new Album(), (AudioItem.AudioGenre)rnd.Next(5));
+                                if (!_plaingItems.Contains(ai))
+                                {
+                                    _plaingItems.Add(ai);
+                                }
+
+                            }
+                        }
+
                         
+                        _currentItem = _plaingItems[0];
+                        _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
+                        CollectionChanged?.Invoke(this, EventArgs.Empty);
                     }
                 }
-
-                CollectionChanged?.Invoke(this, EventArgs.Empty);
-                
-                _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
-                    
-            }
-            catch(Exception)
-            {
-                
-                Console.WriteLine("Couldn't open folder:  {0}", folderPath);
-            }
+                catch (Exception ex)
+                {
+                    string str = ex.Message;
+                    throw;
+                    //Console.WriteLine("Couldn't open folder:  {0}", folderPath);
+                }
+            });
         }
 
         public override void Clear()
@@ -122,47 +132,50 @@ namespace AudioPlayer
         }
 
 
-        public override void Play()
+        public override Task Play()
         {
-            if (!_isLocked)
+            return Task.Factory.StartNew(() =>
             {
-                if (_currentItem != null)
+                if (!_isLocked)
                 {
-                    //if (_playing)
-                    //{
-                    //    Stop();
-                    //}
-
-                    _playing = true;
-                    //_skin.Render("\nPlayer started.");
-
-                    _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
-                    //_wmp.URL = _currentItem.Path;
-                    
-                    //GetPlayingItemData(_currentItem);
-                    
-                    try
+                    if (_currentItem != null)
                     {
-                        _wmp.controls.play();
-                    }
-                    catch (Exception ex)
-                    {
-                        //_skin.Render(ex.Message);
-                        _plaingItems.Remove(_currentItem);
-                        CollectionChanged?.Invoke(this, EventArgs.Empty);
-                    }
+                        //if (_playing)
+                        //{
+                        //    Stop();
+                        //}
 
+                        _playing = true;
+                        //_skin.Render("\nPlayer started.");
+
+                        _wmp.currentMedia = _wmp.newMedia(_currentItem.Path);
+                        //_wmp.URL = _currentItem.Path;
+
+                        //GetPlayingItemData(_currentItem);
+
+                        try
+                        {
+                            _wmp.controls.play();
+                        }
+                        catch (Exception ex)
+                        {
+                            //_skin.Render(ex.Message);
+                            _plaingItems.Remove(_currentItem);
+                            //CollectionChanged?.Invoke(this, EventArgs.Empty);
+                        }
+
+                    }
+                    else
+                    {
+                        //_skin.Render("Please choose a song.");
+                    }
                 }
                 else
                 {
-                    //_skin.Render("Please choose a song.");
+                    //_skin.Render("Player locked... Unlock it to play song.");
                 }
-            }
-            else
-            {
-                //_skin.Render("Player locked... Unlock it to play song.");
-            }
-            
+            });
+
         }
         public override void Stop()
         {
@@ -309,21 +322,22 @@ namespace AudioPlayer
                 {
                     // TODO: dispose managed state (managed objects).
                     _wmp.PlayStateChange -= _wmp_PlayStateChange;
-                    
                     _wmp?.close();
-                    _wmp = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
-                
-                
+                _wmp = null;
+
                 Console.WriteLine("Player dispose");
 
                 disposedValue = true;
             }
             base.Dispose(false);
         }
+
+        
+        
 
 
 

@@ -13,13 +13,15 @@ namespace AudioPlayer
 {
     class Program
     {
+        
+
         static void Main(string[] args)
         {
 
             try
             {
                 Run();
-                GC.Collect();
+                //GC.Collect();
                 
             }
             catch (Exception ex)
@@ -32,102 +34,56 @@ namespace AudioPlayer
         }
         static void Run()
         {
-            using (PlayerBase<AudioItem> player = new Player())
+            using(PlayerView pv = new PlayerView(new Player()))
+            //using (PlayerBase<AudioItem> player = new Player())
             {
 
-                player.LockStateChanged += (sender, e) =>
-                {
-                    PlayerView.UpdateScreen(player);
-                    Console.WriteLine($"Lock state changed event : {e.IsLocked}");
-                };
-                player.VolumeChanged += (sender, e) =>
-                {
-                    PlayerView.UpdateScreen(player);
-                    Console.WriteLine($"Volume changed event : {e.Volume}");
-                };
-                player.CollectionChanged += (sender, e) =>
-                {
-                    PlayerView.UpdateScreen(player);
-                    Console.WriteLine($"Colection changed event");
-                };
-                player.PlayerPlayingStateChanged += (sender, e) =>
-                {
-                    PlayerView.UpdateScreen(player);
-                    Console.WriteLine($"Started/Stopped event : {e.IsPlaying}");
-                };
-                player.PlaingItemStarted += (sender, e) =>
-                {
-                    PlayerView.UpdateScreen(player);
-                    Console.WriteLine($"Started song event : {e.ItemTitle} {e.ItemDuration} {e.ItemDurationMinSec}");
-                };
-
-                player.Load(Environment.CurrentDirectory);
-                Console.WriteLine("set song");
-                player.SetPlayingItem();
-
-                //Console.WriteLine("play");
-                //player.Play();
-                //Console.ReadLine();
-                //Console.WriteLine("set volume");
-                //player.Volume = 50;
-                //Console.ReadLine();
-                //Console.WriteLine("play");
-                //player.Play();
-                //Console.ReadLine();
-                //Console.WriteLine("lock");
-                //player.LockUnLock = true;
-                //Console.ReadLine();
-                //Console.WriteLine("play");
-                //player.Play();
-                //Console.ReadLine();
-                //Console.WriteLine("unlock");
-                //player.LockUnLock = false;
-                //Console.ReadLine();
-
-
+                pv.Load(Environment.CurrentDirectory);
+                
                 while (true)
                 {
-                    player.LabelOutput("Next action:");
+                    //player.LabelOutput("Next action:");
                     //Console.WriteLine("Next action :");
                     string cmd = Console.ReadLine();
                     switch (cmd)
                     {
 
                         case "set volume":
-                            player.Volume = player.Volume;
+                            //player.Volume = player.Volume;
                             break;
                         case "play":
-                            player.Play();
+                            pv.Play();
+                            //player.Play();
                             //player.Playing = true; //error. Property or indexer 'Player.Plaing' cannot be assigned to -- it is read only
                             break;
                         case "stop":
-                            player.Stop();
+                            pv.Stop();
                             break;
                         case "lock":
-                            player.LockUnLock = true;
+                            //player.LockUnLock = true;
                             break;
                         case "unlock":
-                            player.LockUnLock = false;
+                            //player.LockUnLock = false;
                             break;
                         case "set song":
-                            player.SetPlayingItem();
+                            //player.SetPlayingItem();
                             break;
                         case "pause":
-                            player.Pause();
+                            //player.Pause();
                             break;
                         case "show":
                             //player.ShowPlaylist();
                             break;
                         case "sort":
-                            player.SortPlayList_ByTitle();
+                            //player.SortPlayList_ByTitle();
                             break;
                         case "genre filter":
                             //Console.WriteLine("Input Genre you want..");
                             //player.SongListGenreSort(Console.ReadLine().Trim().ToUpper());
-                            (player as Player).Filter_ByGenre();
+                            //(player as Player).Filter_ByGenre();
                             break;
                         case "shuffle":
-                            player.ShufflePlayList();
+                            //player.ShufflePlayList();
                             break;
                         case "quit":
                             //player.ClosePlayer();
@@ -138,31 +94,32 @@ namespace AudioPlayer
                             //break;
 
                         case "set like":
-                            player.SetLike();
+                            //player.SetLike();
                             break;
                         case "set skin":
-                            player.SetSkin();
+                            //player.SetSkin();
                             break;
 
                         case "load":
                             Console.WriteLine("Enter path:");
-                            player.Load(Console.ReadLine());
+                            //player.Load(Console.ReadLine());
+                            pv.Load(Console.ReadLine());
                             break;
                         case "clear":
-                            player.Clear();
+                            //player.Clear();
                             break;
                         case "save playlist":
-                            Console.WriteLine("Enter playlist name:");
-                            player.SavePlaylist(Console.ReadLine());
-                            break;
+                            //Console.WriteLine("Enter playlist name:");
+                            //player.SavePlaylist(Console.ReadLine());
+                            //break;
                         case "load playlist":
-                            Console.WriteLine("Enter path:");
-                            player.LoadPlaylist(Console.ReadLine());
-                            break;
+                            //Console.WriteLine("Enter path:");
+                            //player.LoadPlaylist(Console.ReadLine());
+                            //break;
 
                         default:
-                            player.LabelOutput("Unknown command...");
-
+                            //player.LabelOutput("Unknown command...");
+                            Console.WriteLine("Unknown command...");
                             break;
                     }
 
@@ -174,6 +131,7 @@ namespace AudioPlayer
             }
             
         }
+        
     }
 
 
@@ -181,9 +139,44 @@ namespace AudioPlayer
 
 
 
-    class PlayerView
+    class PlayerView : IDisposable
     {
-        public static void UpdateScreen(PlayerBase<AudioItem> player)
+        PlayerBase<AudioItem> player;
+
+        public PlayerView(PlayerBase<AudioItem> p)
+        {
+            player = p;
+
+            player.LockStateChanged += (sender, e) =>
+            {
+                this.UpdateScreen(player);
+                Console.WriteLine($"Lock state changed event : {e.IsLocked}");
+            };
+            player.VolumeChanged += (sender, e) =>
+            {
+                this.UpdateScreen(player);
+                Console.WriteLine($"Volume changed event : {e.Volume}");
+            };
+            player.CollectionChanged += (sender, e) =>
+            {
+                this.UpdateScreen(player);
+                Console.WriteLine($"Colection changed event");
+            };
+            player.PlayerPlayingStateChanged += (sender, e) =>
+            {
+                this.UpdateScreen(player);
+                Console.WriteLine($"Started/Stopped event : {e.IsPlaying}");
+            };
+            player.PlaingItemStarted += (sender, e) =>
+            {
+                this.UpdateScreen(player);
+                Console.WriteLine($"Started song event : {e.ItemTitle} {e.ItemDuration} {e.ItemDurationMinSec}");
+            };
+
+            //player.Load(Environment.CurrentDirectory);
+        }
+
+        public void UpdateScreen(PlayerBase<AudioItem> player)
         {
             Console.Clear();
 
@@ -207,6 +200,29 @@ namespace AudioPlayer
             Console.WriteLine($"Player Status: lock : {ConvertBoolToString.Convert( player.LockUnLock)}; volume : {player.Volume} ");
             
             Console.WriteLine($"Current Song: {player.GetCurrentPlaingItem<AudioItem>().Item1}  {player.GetCurrentPlaingItem<AudioItem>().Item2}  {player.GetCurrentPlaingItem<AudioItem>().Item3}");
+        }
+        public async void Play()
+        {
+            await player.Play();
+        }
+
+        public async void Load(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                await player.Load(path);
+                
+            }
+        }
+
+        public void Stop()
+        {
+            player.Stop();
+        }
+
+        public void Dispose()
+        {
+            player.Dispose();
         }
     }
 
