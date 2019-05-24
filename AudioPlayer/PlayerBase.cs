@@ -19,7 +19,7 @@ namespace AudioPlayer
         public abstract event EventHandler<VolumeEventArgs> VolumeChanged;
         public abstract event EventHandler<LockEventArgs> LockStateChanged;
 
-
+        protected object lockObject = new object();
         
         protected List<T> _plaingItems;
         protected T _currentItem;
@@ -34,7 +34,7 @@ namespace AudioPlayer
         protected bool _playing;                    //boolean flag. true player plays, false player stopped
         protected double _itemPlayingPosition;     //plaing item position
 
-        public abstract void Play();
+        public abstract Task Play();
         public abstract void Stop();
         public abstract void Pause();
         public abstract void ClosePlayer();
@@ -124,7 +124,7 @@ namespace AudioPlayer
             //_skin.Render($"You set : {_skin.Name}");
         }
 
-        public abstract void Load(string folderPath);
+        public abstract Task Load(string folderPath);
         public virtual void Clear()
         {
             _plaingItems.Clear();
@@ -186,13 +186,14 @@ namespace AudioPlayer
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    _plaingItems = null;
-                    _currentItem = null;
+                    
                     //_skin = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
+                _plaingItems = null;
+                _currentItem = null;
 
                 disposedValue = true;
             }
